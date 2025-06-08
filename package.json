@@ -1,7 +1,17 @@
 {
   "name": "webextension-db",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
@@ -13,6 +23,7 @@
   },
   "keywords": [
     "webextension",
+    "sqlite",
     "database",
     "storage",
     "indexeddb",
