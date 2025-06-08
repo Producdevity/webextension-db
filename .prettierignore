@@ -1,0 +1,34 @@
+# Test coverage reports
+/coverage
+
+# Node.js dependencies
+/node_modules
+
+# Test files
+/test-results
+
+# Documentation files
+/docs
+
+# Temporary files
+/temp
+
+# Configuration files
+/.prettierignore
+
+# IDE and editor directories
+/.idea
+/.vscode
+/.claude
+/.cursor
+
+# Build directories
+/dist
+/build
+/public
+
+# Logs
+/logs
+
+# Other ignored files
+/.DS_Store
