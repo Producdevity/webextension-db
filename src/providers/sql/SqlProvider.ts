@@ -56,7 +56,8 @@ async function detectSQLiteCapabilities(): Promise<SQLiteCapabilities> {
     typeof ServiceWorkerGlobalScope !== 'undefined' &&
     globalThis instanceof ServiceWorkerGlobalScope
   const isMainThread =
-    typeof globalThis.Window !== 'undefined' && globalThis instanceof globalThis.Window
+    typeof globalThis.Window !== 'undefined' &&
+    globalThis instanceof globalThis.Window
 
   // Safari-specific limitations
   const isSafari = browserType === 'safari'
