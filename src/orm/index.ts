@@ -1,9 +1,8 @@
 // ORM Layer - SQL-like operations that work across SQLite and JSON providers
-import { IDatabase, StorageValue, TransactionMode } from '../types/index'
+import { IDatabase, StorageValue } from '../types/index'
 
 // More specific types for SQL operations
 type SQLValue = string | number | boolean | null
-type SQLRecord = Record<string, SQLValue>
 
 // ORM Types
 export interface ColumnDefinition {

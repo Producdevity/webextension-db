@@ -9,14 +9,6 @@ import '../types/globals'
 
 type ChromeStorageArea = 'local' | 'sync' | 'managed'
 
-interface ChromeStorageAPI {
-  get: (keys?: string | string[] | Record<string, unknown>) => Promise<Record<string, unknown>>
-  set: (items: Record<string, unknown>) => Promise<void>
-  remove: (keys: string | string[]) => Promise<void>
-  clear: () => Promise<void>
-  getBytesInUse?: (keys?: string | string[]) => Promise<number>
-}
-
 declare const chrome: any
 
 export class ChromeStorage extends BaseStorage {
