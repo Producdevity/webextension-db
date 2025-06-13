@@ -1,5 +1,5 @@
 // ORM Layer - SQL-like operations that work across SQLite and JSON providers
-import { IDatabase } from '../types/index.js'
+import { IDatabase } from '../types/index'
 
 // ORM Types
 export interface ColumnDefinition {

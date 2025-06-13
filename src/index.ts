@@ -1,14 +1,14 @@
 // Main exports
-export * from './types/index.js'
-export * from './utils/browser-detection.js'
-export * from './storage/base-storage.js'
-export * from './storage/indexeddb-storage.js'
-export * from './storage/chrome-storage.js'
-export * from './storage/browser-storage.js'
-export * from './providers/json/JsonProvider.js'
-export * from './providers/sql/SqlProvider.js'
+export * from './types/index'
+export * from './utils/browser-detection'
+export * from './storage/base-storage'
+export * from './storage/indexeddb-storage'
+export * from './storage/chrome-storage'
+export * from './storage/browser-storage'
+export * from './providers/json/JsonProvider'
+export * from './providers/sql/SqlProvider'
 // ORM exports (with renamed types to avoid conflicts)
-export { ORM, Table, QueryBuilder } from './orm/index.js'
+export { ORM, Table, QueryBuilder } from './orm/index'
 export type {
   ColumnDefinition as ORMColumnDefinition,
   TableSchema as ORMTableSchema,
@@ -17,17 +17,17 @@ export type {
   QueryOptions as ORMQueryOptions,
   InsertData,
   UpdateData,
-} from './orm/index.js'
+} from './orm/index'
 
 // Core database functionality
-import { DatabaseConfig, IDatabase } from './types/index.js'
+import { DatabaseConfig, IDatabase } from './types/index'
 import {
   detectBrowser,
   getBrowserCapabilities,
   getBestStorageBackend,
-} from './utils/browser-detection.js'
-import { JsonProvider } from './providers/json/JsonProvider.js'
-import { SqlProvider } from './providers/sql/SqlProvider.js'
+} from './utils/browser-detection'
+import { JsonProvider } from './providers/json/JsonProvider'
+import { SqlProvider } from './providers/sql/SqlProvider'
 
 /**
  * Create a database instance with automatic provider selection

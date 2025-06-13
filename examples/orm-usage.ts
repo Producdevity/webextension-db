@@ -1,5 +1,5 @@
 // ORM Usage Example - SQL-like operations that work across all browsers
-import { createDatabase, ORM } from '../src/index.js'
+import { createDatabase, ORM } from '../src/index'
 
 // Define table schemas
 const userSchema = {

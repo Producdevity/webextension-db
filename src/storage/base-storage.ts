@@ -3,7 +3,7 @@ import type {
   StorageValue,
   TransactionMode,
   BrowserCapabilities,
-} from '../types/index.js'
+} from '../types/index'
 
 export interface StorageBackend {
   readonly type: StorageBackendType

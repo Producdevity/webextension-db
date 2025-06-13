@@ -9,8 +9,8 @@ import {
   StorageBackendType,
   StorageValue,
   TableSchema,
-} from '../../types/index.js'
-import { detectBrowser } from '../../utils/browser-detection.js'
+} from '../../types/index'
+import { detectBrowser } from '../../utils/browser-detection'
 
 // SQLite WASM imports - these will be available when wa-sqlite is installed
 let SQLiteESMFactory: any
@@ -170,7 +170,7 @@ async function loadSQLiteDependencies(): Promise<boolean> {
 // Load JSON provider as fallback
 async function loadJsonProviderFallback(): Promise<boolean> {
   try {
-    const { JsonProvider: JP } = await import('../json/JsonProvider.js')
+    const { JsonProvider: JP } = await import('../json/JsonProvider')
     JsonProvider = JP
     return true
   } catch (error) {

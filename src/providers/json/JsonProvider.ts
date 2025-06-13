@@ -12,12 +12,12 @@ import {
   QueryFilter,
   QueryOptions,
   TableSchema,
-} from '../../types/index.js'
-import { BaseStorage } from '../../storage/base-storage.js'
-import { getBestStorageBackend } from '../../utils/browser-detection.js'
-import { IndexedDBStorage } from '../../storage/indexeddb-storage.js'
-import { ChromeStorage } from '../../storage/chrome-storage.js'
-import { BrowserStorage } from '../../storage/browser-storage.js'
+} from '../../types/index'
+import { BaseStorage } from '../../storage/base-storage'
+import { getBestStorageBackend } from '../../utils/browser-detection'
+import { IndexedDBStorage } from '../../storage/indexeddb-storage'
+import { ChromeStorage } from '../../storage/chrome-storage'
+import { BrowserStorage } from '../../storage/browser-storage'
 
 export class JsonProvider implements IDatabase {
   public readonly name: string

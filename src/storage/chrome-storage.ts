@@ -1,10 +1,10 @@
-import { BaseStorage } from './base-storage.js'
+import { BaseStorage } from './base-storage'
 import type {
   StorageBackendType,
   StorageValue,
   TransactionMode,
   BrowserCapabilities,
-} from '../types/index.js'
+} from '../types/index'
 
 type ChromeStorageArea = 'local' | 'sync' | 'managed'
 

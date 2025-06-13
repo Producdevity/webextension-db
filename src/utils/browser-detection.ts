@@ -2,7 +2,7 @@ import type {
   BrowserType,
   BrowserCapabilities,
   StorageBackendType,
-} from '../types/index.js'
+} from '../types/index'
 
 // Type declarations for global objects in web extension context
 declare global {
