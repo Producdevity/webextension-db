@@ -46,8 +46,14 @@ declare global {
 
   // File System Access API types (for OPFS support)
   interface FileSystemDirectoryHandle {
-    getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>
-    getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<FileSystemDirectoryHandle>
+    getFileHandle(
+      name: string,
+      options?: { create?: boolean },
+    ): Promise<FileSystemFileHandle>
+    getDirectoryHandle(
+      name: string,
+      options?: { create?: boolean },
+    ): Promise<FileSystemDirectoryHandle>
   }
 
   interface StorageEstimate {

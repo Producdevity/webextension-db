@@ -470,7 +470,7 @@ export class QueryBuilder {
     _isInsert: boolean = true,
   ): void {
     const columnNames = Object.keys(this.schema)
-    
+
     // Check for unknown columns
     for (const column of Object.keys(data)) {
       if (!columnNames.includes(column)) {
