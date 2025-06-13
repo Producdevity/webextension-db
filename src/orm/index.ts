@@ -1,13 +1,6 @@
 // ORM Layer - SQL-like operations that work across SQLite and JSON providers
 import { IDatabase, StorageValue } from '../types/index'
 
-// More specific types for SQL operations
-type SQLValue = string | number | boolean | null
-// Records returned from queries can be StorageValue (for JSON) or SQL row objects
-type QueryRecord = Record<string, StorageValue>
-// Primary key values
-type PrimaryKeyValue = string | number
-
 // ORM Types
 export interface ColumnDefinition {
   type: 'TEXT' | 'INTEGER' | 'REAL' | 'BLOB' | 'BOOLEAN' | 'JSON'
@@ -25,7 +18,7 @@ export interface TableSchema {
 export interface WhereCondition {
   column: string
   operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'IN' | 'NOT IN'
-  value: SQLValue | SQLValue[] // Allow arrays for IN operations
+  value: any // SQL values can be complex and varied
 }
 
 export interface OrderBy {
@@ -61,7 +54,7 @@ export class QueryBuilder {
   }
 
   // SELECT operations
-  async findAll(options: QueryOptions = {}): Promise<QueryRecord[]> {
+  async findAll(options: QueryOptions = {}): Promise<any[]> {
     if (this.db.provider === 'sqlite') {
       return this.findAllSQL(options)
     } else {
@@ -69,12 +62,12 @@ export class QueryBuilder {
     }
   }
 
-  async findOne(options: QueryOptions = {}): Promise<QueryRecord | null> {
+  async findOne(options: QueryOptions = {}): Promise<any | null> {
     const results = await this.findAll({ ...options, limit: 1 })
     return results.length > 0 ? results[0] : null
   }
 
-  async findById(id: PrimaryKeyValue): Promise<QueryRecord | null> {
+  async findById(id: any): Promise<any | null> {
     if (!this.db.query) {
       throw new Error('Database does not support SQL queries')
     }
@@ -82,14 +75,11 @@ export class QueryBuilder {
     const sql = `SELECT * FROM ${this.tableName} WHERE ${primaryKey} = ?`
     const params = [id]
     const result = await this.db.query(sql, params)
-    if (result.length > 0 && result[0]) {
-      return result[0] as QueryRecord
-    }
-    return null
+    return result.length > 0 ? result[0] : null
   }
 
   // INSERT operations
-  async insert(data: InsertData): Promise<QueryRecord> {
+  async insert(data: InsertData): Promise<any> {
     this.validateData(data)
 
     if (this.db.provider === 'sqlite') {
@@ -118,7 +108,7 @@ export class QueryBuilder {
     }
   }
 
-  async updateById(id: PrimaryKeyValue, data: UpdateData): Promise<boolean> {
+  async updateById(id: any, data: UpdateData): Promise<boolean> {
     const primaryKey = this.getPrimaryKeyColumn()
     const updated = await this.update(data, {
       where: [{ column: primaryKey, operator: '=', value: id }],

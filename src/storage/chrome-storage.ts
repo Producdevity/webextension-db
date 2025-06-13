@@ -5,7 +5,6 @@ import {
   TransactionMode,
   BrowserCapabilities,
 } from '../types/index'
-import '../types/globals'
 
 type ChromeStorageArea = 'local' | 'sync' | 'managed'
 

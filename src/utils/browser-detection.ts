@@ -4,6 +4,9 @@ import type {
   StorageBackendType,
 } from '../types/index'
 
+// Declare browser global for Firefox/Safari
+declare const browser: any
+
 /**
  * Detect the current browser type in a web extension context
  */
@@ -90,8 +93,7 @@ export function getBrowserCapabilities(
 
     case 'firefox':
       capabilities.hasBrowserStorage =
-        typeof globalThis.browser !== 'undefined' &&
-        !!(globalThis.browser as any)?.storage
+        typeof browser !== 'undefined' && !!(browser as any).storage
       capabilities.maxStorageSize = capabilities.hasBrowserStorage
         ? Infinity
         : 5 * 1024 * 1024
@@ -101,8 +103,7 @@ export function getBrowserCapabilities(
 
     case 'safari':
       capabilities.hasBrowserStorage =
-        typeof globalThis.browser !== 'undefined' &&
-        !!(globalThis.browser as any)?.storage
+        typeof browser !== 'undefined' && !!(browser as any).storage
       // Safari has more restrictive WebAssembly support in extensions
       capabilities.supportsWASM =
         capabilities.supportsWASM && !isInServiceWorker()
@@ -206,8 +207,8 @@ export function isStorageBackendAvailable(
 export function getExtensionAPI(): Record<string, any> | null {
   if (typeof globalThis !== 'undefined') {
     // Try browser first (Firefox/Safari)
-    if (globalThis.browser?.runtime) {
-      return globalThis.browser as Record<string, any>
+    if (typeof browser !== 'undefined' && browser.runtime) {
+      return browser as Record<string, any>
     }
     // Fall back to chrome (Chrome/Edge/Opera)
     if (globalThis.chrome?.runtime) {
@@ -339,7 +340,7 @@ export function checkExtensionStorageSupport(): boolean {
  */
 export function getExtensionAPINamespace(): 'chrome' | 'browser' | null {
   if (typeof globalThis !== 'undefined') {
-    if (globalThis.browser?.runtime) {
+    if (typeof browser !== 'undefined' && browser.runtime) {
       return 'browser'
     }
     if (globalThis.chrome?.runtime) {
