@@ -7,6 +7,17 @@ export * from './storage/chrome-storage.js'
 export * from './storage/browser-storage.js'
 export * from './providers/json/JsonProvider.js'
 export * from './providers/sql/SqlProvider.js'
+// ORM exports (with renamed types to avoid conflicts)
+export { ORM, Table, QueryBuilder } from './orm/index.js'
+export type {
+  ColumnDefinition as ORMColumnDefinition,
+  TableSchema as ORMTableSchema,
+  WhereCondition,
+  OrderBy,
+  QueryOptions as ORMQueryOptions,
+  InsertData,
+  UpdateData,
+} from './orm/index.js'
 
 // Core database functionality
 import { DatabaseConfig, IDatabase } from './types/index.js'
