@@ -48,15 +48,15 @@ async function detectSQLiteCapabilities(): Promise<SQLiteCapabilities> {
     'getDirectory' in navigator.storage
   const hasSyncAccessHandle =
     hasOPFS &&
-    typeof FileSystemFileHandle !== 'undefined' &&
-    'createSyncAccessHandle' in FileSystemFileHandle.prototype
+    typeof globalThis.FileSystemFileHandle !== 'undefined' &&
+    'createSyncAccessHandle' in globalThis.FileSystemFileHandle.prototype
   const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined'
   const hasWorkers = typeof Worker !== 'undefined'
   const isServiceWorker =
     typeof ServiceWorkerGlobalScope !== 'undefined' &&
     globalThis instanceof ServiceWorkerGlobalScope
   const isMainThread =
-    typeof Window !== 'undefined' && globalThis instanceof Window
+    typeof globalThis.Window !== 'undefined' && globalThis instanceof globalThis.Window
 
   // Safari-specific limitations
   const isSafari = browserType === 'safari'
