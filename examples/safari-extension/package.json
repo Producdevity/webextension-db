@@ -1,0 +1,23 @@
+{
+  "name": "webextension-db-safari-example",
+  "version": "1.0.0",
+  "description": "Safari extension example using webextension-db",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "webextension-db": "file:../../",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup": "^4.5.0",
+    "typescript": "^5.2.2",
+    "rimraf": "^5.0.5"
+  }
+} 

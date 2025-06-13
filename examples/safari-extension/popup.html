@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WebExtension DB Safari Example</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    textarea {
+      height: 80px;
+      resize: vertical;
+      font-family: monospace;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .btn-primary {
+      background-color: #007AFF;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #0056CC;
+    }
+    
+    .btn-secondary {
+      background-color: #8E8E93;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #6D6D70;
+    }
+    
+    .btn-danger {
+      background-color: #FF3B30;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #D70015;
+    }
+    
+    .output {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      height: 200px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    
+    .output div {
+      margin-bottom: 5px;
+      padding: 2px 0;
+    }
+    
+    .success {
+      color: #28a745;
+    }
+    
+    .error {
+      color: #dc3545;
+    }
+    
+    .footer {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>🦄 WebExtension DB</h2>
+    <p>Safari Extension Example</p>
+  </div>
+  
+  <div class="form-group">
+    <label for="keyInput">Key:</label>
+    <input type="text" id="keyInput" placeholder="Enter key name">
+  </div>
+  
+  <div class="form-group">
+    <label for="valueInput">Value (JSON or text):</label>
+    <textarea id="valueInput" placeholder='{"name": "example"} or just text'></textarea>
+  </div>
+  
+  <div class="button-group">
+    <button id="setButton" class="btn-primary">Set</button>
+    <button id="getButton" class="btn-secondary">Get</button>
+    <button id="deleteButton" class="btn-danger">Delete</button>
+  </div>
+  
+  <div class="button-group">
+    <button id="listButton" class="btn-secondary">List Keys</button>
+    <button id="clearButton" class="btn-secondary">Clear Output</button>
+  </div>
+  
+  <div class="form-group">
+    <label>Output:</label>
+    <div id="output" class="output"></div>
+  </div>
+  
+  <div class="footer">
+    <p>Powered by webextension-db</p>
+  </div>
+  
+  <script src="dist/popup.js"></script>
+</body>
+</html> 
