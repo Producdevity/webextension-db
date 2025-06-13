@@ -25,8 +25,10 @@
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist",
     "prepack": "npm run clean && npm run build",
-    "build:examples": "npm run build:example:chrome",
+    "build:examples": "npm run build:example:chrome && npm run build:example:firefox && npm run build:example:safari",
     "build:example:chrome": "cd examples/chrome-extension && npm install && npm run build",
+    "build:example:firefox": "cd examples/firefox-extension && npm install && npm run build",
+    "build:example:safari": "cd examples/safari-extension && npm install && npm run build",
     "build:all": "npm run build && npm run build:examples",
     "example:sqlite": "cd examples/sqlite-basic && npm run build",
     "example:json": "cd examples/json-basic && npm run build"
