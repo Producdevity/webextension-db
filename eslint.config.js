@@ -3,7 +3,6 @@ import tsParser from '@typescript-eslint/parser'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import prettier from 'eslint-plugin-prettier'
 import prettierConfig from 'eslint-config-prettier'
-import importPlugin from 'eslint-plugin-import'
 
 export default [
   eslint.configs.recommended,
@@ -36,16 +35,33 @@ export default [
     plugins: {
       '@typescript-eslint': tsPlugin,
       prettier: prettier,
-      import: importPlugin,
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
       ...prettierConfig.rules,
       'prettier/prettier': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/ban-types': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/ban-types': 'error',
       'no-useless-escape': 'off',
+    },
+  },
+  {
+    // Storage layers - allow any for extension APIs and browser compatibility
+    files: [
+      'src/storage/*.ts',
+      'src/utils/browser-detection.ts',
+      'src/types/globals.d.ts'
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn', // Warn instead of error
+    },
+  },
+  {
+    // SQLite provider - allow any for WASM interop but require // eslint-disable comments
+    files: ['src/providers/sql/SqlProvider.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn', // Warn instead of error
     },
   },
   {
