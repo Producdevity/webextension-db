@@ -7,7 +7,7 @@ A unified database API for web extensions that works seamlessly across Chrome, F
 - 🌐 **Cross-browser compatibility** - Works on Chrome, Firefox, and Safari
 - 🔄 **Automatic provider selection** - Chooses the best storage backend for each browser
 - 💾 **Multiple storage options** - IndexedDB, Chrome Storage, Browser Storage APIs
-- 📊 **JSON and SQLite support** - Flexible data storage options (SQLite coming soon)
+- 📊 **JSON and SQLite support** - Flexible data storage options
 - 🛡️ **Type-safe** - Full TypeScript support with comprehensive type definitions
 - ⚡ **High performance** - Optimized for extension environments
 - 🔧 **Easy to use** - Simple, consistent API across all browsers
