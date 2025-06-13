@@ -305,24 +305,8 @@ Check out the [examples](./examples) directory for complete working examples:
 
 ## Contributing
 
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) and [code of conduct](CODE_OF_CONDUCT.md).
+Contributions are welcome!
 
 ## License
 
-MIT © [Your Name]
-
-## Roadmap
-
-- [ ] SQLite provider with WASM support
-- [ ] Data migration utilities
-- [ ] Sync capabilities between devices
-- [ ] Performance monitoring
-- [ ] Advanced querying for JSON provider
-- [ ] Encryption support
-- [ ] Backup/restore functionality
-
-## Support
-
-- 📖 [Documentation](https://github.com/your-username/webextension-db/wiki)
-- 🐛 [Issue Tracker](https://github.com/your-username/webextension-db/issues)
-- 💬 [Discussions](https://github.com/your-username/webextension-db/discussions) 
+MIT ©
