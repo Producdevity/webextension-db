@@ -45,16 +45,7 @@ export default [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/ban-types': 'warn',
-      'import/extensions': [
-        'error',
-        'ignorePackages',
-        {
-          js: 'never',
-          ts: 'never',
-          tsx: 'never',
-          jsx: 'never',
-        },
-      ],
+      'no-useless-escape': 'off',
     },
   },
   {
