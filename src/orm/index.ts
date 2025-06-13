@@ -3,6 +3,10 @@ import { IDatabase, StorageValue } from '../types/index'
 
 // More specific types for SQL operations
 type SQLValue = string | number | boolean | null
+// Records returned from queries can be StorageValue (for JSON) or SQL row objects
+type QueryRecord = Record<string, StorageValue>
+// Primary key values
+type PrimaryKeyValue = string | number
 
 // ORM Types
 export interface ColumnDefinition {
@@ -57,7 +61,7 @@ export class QueryBuilder {
   }
 
   // SELECT operations
-  async findAll(options: QueryOptions = {}): Promise<any[]> {
+  async findAll(options: QueryOptions = {}): Promise<QueryRecord[]> {
     if (this.db.provider === 'sqlite') {
       return this.findAllSQL(options)
     } else {
@@ -65,12 +69,12 @@ export class QueryBuilder {
     }
   }
 
-  async findOne(options: QueryOptions = {}): Promise<any | null> {
+  async findOne(options: QueryOptions = {}): Promise<QueryRecord | null> {
     const results = await this.findAll({ ...options, limit: 1 })
     return results.length > 0 ? results[0] : null
   }
 
-  async findById(id: any): Promise<any | null> {
+  async findById(id: PrimaryKeyValue): Promise<QueryRecord | null> {
     if (!this.db.query) {
       throw new Error('Database does not support SQL queries')
     }
@@ -78,11 +82,14 @@ export class QueryBuilder {
     const sql = `SELECT * FROM ${this.tableName} WHERE ${primaryKey} = ?`
     const params = [id]
     const result = await this.db.query(sql, params)
-    return result.length > 0 ? result[0] : null
+    if (result.length > 0 && result[0]) {
+      return result[0] as QueryRecord
+    }
+    return null
   }
 
   // INSERT operations
-  async insert(data: InsertData): Promise<any> {
+  async insert(data: InsertData): Promise<QueryRecord> {
     this.validateData(data)
 
     if (this.db.provider === 'sqlite') {
@@ -111,7 +118,7 @@ export class QueryBuilder {
     }
   }
 
-  async updateById(id: any, data: UpdateData): Promise<boolean> {
+  async updateById(id: PrimaryKeyValue, data: UpdateData): Promise<boolean> {
     const primaryKey = this.getPrimaryKeyColumn()
     const updated = await this.update(data, {
       where: [{ column: primaryKey, operator: '=', value: id }],
@@ -154,7 +161,9 @@ export class QueryBuilder {
     return this.db.query(sql, params)
   }
 
-  private async insertSQL(data: InsertData): Promise<Record<string, StorageValue>> {
+  private async insertSQL(
+    data: InsertData,
+  ): Promise<Record<string, StorageValue>> {
     if (!this.db.exec) {
       throw new Error('Database does not support SQL execution')
     }
@@ -174,7 +183,12 @@ export class QueryBuilder {
       const lastIdResult = await this.db.query(
         'SELECT last_insert_rowid() as id',
       )
-      if (lastIdResult.length > 0 && lastIdResult[0] && typeof lastIdResult[0] === 'object' && 'id' in lastIdResult[0]) {
+      if (
+        lastIdResult.length > 0 &&
+        lastIdResult[0] &&
+        typeof lastIdResult[0] === 'object' &&
+        'id' in lastIdResult[0]
+      ) {
         return { ...data, [primaryKey]: lastIdResult[0].id }
       }
     }
@@ -225,8 +239,13 @@ export class QueryBuilder {
     const { whereClause, params } = this.buildWhereClause(options.where || [])
     const sql = `SELECT COUNT(*) as count FROM ${this.tableName}${whereClause}`
     const result = await this.db.query(sql, params)
-    
-    if (result.length > 0 && result[0] && typeof result[0] === 'object' && 'count' in result[0]) {
+
+    if (
+      result.length > 0 &&
+      result[0] &&
+      typeof result[0] === 'object' &&
+      'count' in result[0]
+    ) {
       const count = result[0].count
       return typeof count === 'number' ? count : 0
     }

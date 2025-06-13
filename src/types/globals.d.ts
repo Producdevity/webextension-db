@@ -2,17 +2,21 @@
  * Global type definitions for web extension environments
  */
 
-// Extension storage types  
+// Extension storage types
 interface ExtensionStorageAPI {
   local: {
-    get: (keys?: string | string[] | Record<string, unknown>) => Promise<Record<string, unknown>>
+    get: (
+      keys?: string | string[] | Record<string, unknown>,
+    ) => Promise<Record<string, unknown>>
     set: (items: Record<string, unknown>) => Promise<void>
     remove: (keys: string | string[]) => Promise<void>
     clear: () => Promise<void>
     getBytesInUse?: (keys?: string | string[]) => Promise<number>
   }
   sync?: {
-    get: (keys?: string | string[] | Record<string, unknown>) => Promise<Record<string, unknown>>
+    get: (
+      keys?: string | string[] | Record<string, unknown>,
+    ) => Promise<Record<string, unknown>>
     set: (items: Record<string, unknown>) => Promise<void>
     remove: (keys: string | string[]) => Promise<void>
     clear: () => Promise<void>

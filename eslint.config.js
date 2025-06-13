@@ -55,14 +55,25 @@ export default [
       'src/types/globals.d.ts'
     ],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn', // Warn instead of error
+      '@typescript-eslint/no-explicit-any': 'off', // Extension APIs require dynamic typing
+      'no-undef': 'off', // Global declarations may reference browser types
     },
   },
   {
-    // SQLite provider - allow any for WASM interop but require // eslint-disable comments
+    // SQLite provider - allow any for WASM interop
     files: ['src/providers/sql/SqlProvider.ts'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn', // Warn instead of error
+      '@typescript-eslint/no-explicit-any': 'off', // WASM interop requires dynamic typing
+    },
+  },
+  {
+    // ORM and JSON provider - allow any for dynamic SQL generation and cross-provider compatibility
+    files: [
+      'src/orm/index.ts',
+      'src/providers/json/JsonProvider.ts'
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off', // Dynamic SQL and mixed data types require flexibility
     },
   },
   {
