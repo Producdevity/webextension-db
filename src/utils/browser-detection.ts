@@ -4,11 +4,6 @@ import type {
   StorageBackendType,
 } from '../types/index'
 
-// Type declarations for global objects in web extension context
-declare global {
-  const globalThis: any
-}
-
 /**
  * Detect the current browser type in a web extension context
  */
@@ -17,8 +12,8 @@ export function detectBrowser(): BrowserType {
   try {
     // Chrome/Edge/Opera - chrome namespace
     if (
-      typeof (globalThis as any).chrome !== 'undefined' &&
-      (globalThis as any).chrome.runtime?.id
+      typeof globalThis.chrome !== 'undefined' &&
+      globalThis.chrome.runtime?.id
     ) {
       return 'chrome'
     }
@@ -85,8 +80,7 @@ export function getBrowserCapabilities(
   switch (browser) {
     case 'chrome':
       capabilities.hasChromeStorage =
-        typeof (globalThis as any).chrome !== 'undefined' &&
-        !!(globalThis as any).chrome.storage
+        typeof globalThis.chrome !== 'undefined' && !!globalThis.chrome.storage
       capabilities.maxStorageSize = capabilities.hasChromeStorage
         ? Infinity
         : 5 * 1024 * 1024
@@ -96,7 +90,8 @@ export function getBrowserCapabilities(
 
     case 'firefox':
       capabilities.hasBrowserStorage =
-        typeof browser !== 'undefined' && !!(browser as any).storage
+        typeof globalThis.browser !== 'undefined' &&
+        !!(globalThis.browser as any)?.storage
       capabilities.maxStorageSize = capabilities.hasBrowserStorage
         ? Infinity
         : 5 * 1024 * 1024
@@ -106,7 +101,8 @@ export function getBrowserCapabilities(
 
     case 'safari':
       capabilities.hasBrowserStorage =
-        typeof browser !== 'undefined' && !!(browser as any).storage
+        typeof globalThis.browser !== 'undefined' &&
+        !!(globalThis.browser as any)?.storage
       // Safari has more restrictive WebAssembly support in extensions
       capabilities.supportsWASM =
         capabilities.supportsWASM && !isInServiceWorker()
@@ -207,15 +203,15 @@ export function isStorageBackendAvailable(
 /**
  * Get the extension API object (chrome or browser)
  */
-export function getExtensionAPI(): any {
+export function getExtensionAPI(): Record<string, any> | null {
   if (typeof globalThis !== 'undefined') {
     // Try browser first (Firefox/Safari)
-    if ((globalThis as any).browser?.runtime) {
-      return (globalThis as any).browser
+    if (globalThis.browser?.runtime) {
+      return globalThis.browser as Record<string, any>
     }
     // Fall back to chrome (Chrome/Edge/Opera)
-    if ((globalThis as any).chrome?.runtime) {
-      return (globalThis as any).chrome
+    if (globalThis.chrome?.runtime) {
+      return globalThis.chrome as Record<string, any>
     }
   }
   return null
@@ -343,10 +339,10 @@ export function checkExtensionStorageSupport(): boolean {
  */
 export function getExtensionAPINamespace(): 'chrome' | 'browser' | null {
   if (typeof globalThis !== 'undefined') {
-    if ((globalThis as any).browser?.runtime) {
+    if (globalThis.browser?.runtime) {
       return 'browser'
     }
-    if ((globalThis as any).chrome?.runtime) {
+    if (globalThis.chrome?.runtime) {
       return 'chrome'
     }
   }
@@ -522,16 +518,16 @@ export function getManifestVersion(): number {
  */
 export function createLogger(prefix: string) {
   return {
-    debug: (message: string, ...args: any[]) => {
+    debug: (message: string, ...args: unknown[]) => {
       console.debug(`[${prefix}] ${message}`, ...args)
     },
-    info: (message: string, ...args: any[]) => {
+    info: (message: string, ...args: unknown[]) => {
       console.info(`[${prefix}] ${message}`, ...args)
     },
-    warn: (message: string, ...args: any[]) => {
+    warn: (message: string, ...args: unknown[]) => {
       console.warn(`[${prefix}] ${message}`, ...args)
     },
-    error: (message: string, ...args: any[]) => {
+    error: (message: string, ...args: unknown[]) => {
       console.error(`[${prefix}] ${message}`, ...args)
     },
   }

@@ -1,12 +1,21 @@
 import { BaseStorage } from './base-storage'
-import type {
+import {
   StorageBackendType,
   StorageValue,
   TransactionMode,
   BrowserCapabilities,
 } from '../types/index'
+import '../types/globals'
 
 type ChromeStorageArea = 'local' | 'sync' | 'managed'
+
+interface ChromeStorageAPI {
+  get: (keys?: string | string[] | Record<string, unknown>) => Promise<Record<string, unknown>>
+  set: (items: Record<string, unknown>) => Promise<void>
+  remove: (keys: string | string[]) => Promise<void>
+  clear: () => Promise<void>
+  getBytesInUse?: (keys?: string | string[]) => Promise<number>
+}
 
 declare const chrome: any
 
@@ -14,7 +23,7 @@ export class ChromeStorage extends BaseStorage {
   readonly type: StorageBackendType = 'chrome-storage'
 
   private area: ChromeStorageArea
-  private storageAPI: any
+  private storageAPI: any // Chrome extension storage API uses callbacks, not promises
   private keyPrefix: string
 
   constructor(

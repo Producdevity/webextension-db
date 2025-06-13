@@ -131,13 +131,16 @@ export interface IDatabase {
     table: string,
     filter?: QueryFilter,
     options?: QueryOptions,
-  ): Promise<any[]>
-  findOne?(table: string, filter?: QueryFilter): Promise<any | undefined>
+  ): Promise<StorageValue[]>
+  findOne?(
+    table: string,
+    filter?: QueryFilter,
+  ): Promise<StorageValue | undefined>
   count?(table: string, filter?: QueryFilter): Promise<number>
 
   // SQL operations (SQLite provider only)
-  query?(sql: string, params?: any[]): Promise<any[]>
-  exec?(sql: string, params?: any[]): Promise<void>
+  query?(sql: string, params?: StorageValue[]): Promise<StorageValue[]>
+  exec?(sql: string, params?: StorageValue[]): Promise<void>
 
   // Batch operations
   batch(operations: BatchOperation[]): Promise<void>
@@ -148,9 +151,9 @@ export interface IDatabase {
   listTables(): Promise<string[]>
 
   // Events
-  on(event: string, callback: Function): void
-  off(event: string, callback: Function): void
-  emit(event: string, ...args: any[]): void
+  on(event: string, callback: DatabaseEventListener): void
+  off(event: string, callback: DatabaseEventListener): void
+  emit(event: string, ...args: StorageValue[]): void
 }
 
 // Transaction interface
@@ -340,7 +343,7 @@ export interface DatabaseEvent {
   type: 'connected' | 'disconnected' | 'error' | 'storage-quota-warning'
   provider: DatabaseProviderType
   backend?: StorageBackendType
-  data?: any
+  data?: StorageValue
   error?: Error
 }
 

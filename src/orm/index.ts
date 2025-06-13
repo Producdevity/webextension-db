@@ -1,5 +1,9 @@
 // ORM Layer - SQL-like operations that work across SQLite and JSON providers
-import { IDatabase } from '../types/index'
+import { IDatabase, StorageValue, TransactionMode } from '../types/index'
+
+// More specific types for SQL operations
+type SQLValue = string | number | boolean | null
+type SQLRecord = Record<string, SQLValue>
 
 // ORM Types
 export interface ColumnDefinition {
@@ -7,7 +11,7 @@ export interface ColumnDefinition {
   primaryKey?: boolean
   unique?: boolean
   notNull?: boolean
-  defaultValue?: any
+  defaultValue?: StorageValue
   autoIncrement?: boolean
 }
 
@@ -18,7 +22,7 @@ export interface TableSchema {
 export interface WhereCondition {
   column: string
   operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'IN' | 'NOT IN'
-  value: any
+  value: SQLValue | SQLValue[] // Allow arrays for IN operations
 }
 
 export interface OrderBy {
@@ -34,11 +38,11 @@ export interface QueryOptions {
 }
 
 export interface InsertData {
-  [column: string]: any
+  [column: string]: StorageValue
 }
 
 export interface UpdateData {
-  [column: string]: any
+  [column: string]: StorageValue
 }
 
 // ORM Query Builder
@@ -151,7 +155,7 @@ export class QueryBuilder {
     return this.db.query(sql, params)
   }
 
-  private async insertSQL(data: InsertData): Promise<any> {
+  private async insertSQL(data: InsertData): Promise<Record<string, StorageValue>> {
     if (!this.db.exec) {
       throw new Error('Database does not support SQL execution')
     }
@@ -171,7 +175,9 @@ export class QueryBuilder {
       const lastIdResult = await this.db.query(
         'SELECT last_insert_rowid() as id',
       )
-      return { ...data, [primaryKey]: lastIdResult[0].id }
+      if (lastIdResult.length > 0 && lastIdResult[0] && typeof lastIdResult[0] === 'object' && 'id' in lastIdResult[0]) {
+        return { ...data, [primaryKey]: lastIdResult[0].id }
+      }
     }
 
     return data
@@ -220,7 +226,12 @@ export class QueryBuilder {
     const { whereClause, params } = this.buildWhereClause(options.where || [])
     const sql = `SELECT COUNT(*) as count FROM ${this.tableName}${whereClause}`
     const result = await this.db.query(sql, params)
-    return result[0].count
+    
+    if (result.length > 0 && result[0] && typeof result[0] === 'object' && 'count' in result[0]) {
+      const count = result[0].count
+      return typeof count === 'number' ? count : 0
+    }
+    return 0
   }
 
   // JSON implementations (for Safari fallback)
