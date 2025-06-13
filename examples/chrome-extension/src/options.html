@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebExtension DB - Full Testing Suite</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f8f9fa;
+      color: #212529;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+      font-size: 28px;
+    }
+    
+    .header p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 16px;
+    }
+    
+    .provider-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .provider-tab {
+      flex: 1;
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-right: 1px solid #dee2e6;
+    }
+    
+    .provider-tab:last-child {
+      border-right: none;
+    }
+    
+    .provider-tab.active {
+      background: #007bff;
+      color: white;
+    }
+    
+    .provider-tab:hover:not(.active) {
+      background: #e9ecef;
+    }
+    
+    .provider-content {
+      display: none;
+    }
+    
+    .provider-content.active {
+      display: block;
+    }
+    
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .test-section h3 {
+      margin: 0 0 15px 0;
+      color: #495057;
+      font-size: 18px;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 8px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 100px;
+    }
+    
+    .btn-primary { background: #007bff; color: white; }
+    .btn-primary:hover { background: #0056b3; }
+    
+    .btn-success { background: #28a745; color: white; }
+    .btn-success:hover { background: #1e7e34; }
+    
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger:hover { background: #c82333; }
+    
+    .btn-warning { background: #ffc107; color: #212529; }
+    .btn-warning:hover { background: #e0a800; }
+    
+    .btn-info { background: #17a2b8; color: white; }
+    .btn-info:hover { background: #138496; }
+    
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-secondary:hover { background: #545b62; }
+    
+    .output-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .output-section h3 {
+      margin: 0 0 15px 0;
+      color: #495057;
+      font-size: 18px;
+    }
+    
+    .output {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 400px;
+      overflow-y: auto;
+      color: #495057;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-ready { background: #28a745; }
+    .status-error { background: #dc3545; }
+    .status-loading { background: #ffc107; }
+    
+    .benchmark-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .benchmark-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+    
+    .benchmark-card h4 {
+      margin: 0 0 10px 0;
+      color: #495057;
+      font-size: 14px;
+    }
+    
+    .benchmark-card .value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    
+    .benchmark-card .unit {
+      font-size: 12px;
+      color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>WebExtension DB - Full Testing Suite</h1>
+      <p>Comprehensive testing interface for JSON and SQLite providers</p>
+    </div>
+
+    <div class="provider-tabs">
+      <button class="provider-tab active" data-provider="json">
+        <span class="status-indicator status-loading" id="json-status"></span>
+        JSON Provider
+      </button>
+      <button class="provider-tab" data-provider="sqlite">
+        <span class="status-indicator status-loading" id="sqlite-status"></span>
+        SQLite Provider
+      </button>
+    </div>
+
+    <div class="provider-content active" id="json-content">
+      <div class="test-grid">
+        <div class="test-section">
+          <h3>Basic Operations</h3>
+          <div class="form-group">
+            <label>Table Name:</label>
+            <input type="text" id="json-table" value="test_table" placeholder="Table name">
+          </div>
+          <div class="form-group">
+            <label>Key:</label>
+            <input type="text" id="json-key" placeholder="Key">
+          </div>
+          <div class="form-group">
+            <label>Value (JSON):</label>
+            <textarea id="json-value" placeholder='{"name": "John", "age": 30}'></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="jsonOperations.set()">Set</button>
+            <button class="btn-success" onclick="jsonOperations.get()">Get</button>
+            <button class="btn-danger" onclick="jsonOperations.delete()">Delete</button>
+            <button class="btn-info" onclick="jsonOperations.exists()">Exists</button>
+          </div>
+        </div>
+
+        <div class="test-section">
+          <h3>Query Operations</h3>
+          <div class="form-group">
+            <label>Query (JSON):</label>
+            <textarea id="json-query" placeholder='{"age": {"$gte": 18}}'></textarea>
+          </div>
+          <div class="form-group">
+            <label>Options (JSON):</label>
+            <textarea id="json-options" placeholder='{"sort": {"age": 1}, "limit": 10}'></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="jsonOperations.find()">Find</button>
+            <button class="btn-info" onclick="jsonOperations.count()">Count</button>
+            <button class="btn-warning" onclick="jsonOperations.generateSampleData()">Generate Sample Data</button>
+          </div>
+        </div>
+
+        <div class="test-section">
+          <h3>Bulk Operations</h3>
+          <div class="form-group">
+            <label>Bulk Data (JSON Array):</label>
+            <textarea id="json-bulk-data" placeholder='[{"key": "user1", "value": {"name": "Alice"}}, {"key": "user2", "value": {"name": "Bob"}}]'></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="jsonOperations.bulkInsert()">Bulk Insert</button>
+            <button class="btn-danger" onclick="jsonOperations.clear()">Clear Table</button>
+          </div>
+        </div>
+
+        <div class="test-section">
+          <h3>Advanced Operations</h3>
+          <div class="button-group">
+            <button class="btn-info" onclick="jsonOperations.transaction()">Test Transaction</button>
+            <button class="btn-warning" onclick="jsonOperations.benchmark()">Run Benchmark</button>
+            <button class="btn-secondary" onclick="jsonOperations.getStats()">Get Stats</button>
+          </div>
+          <div class="benchmark-results" id="json-benchmark-results" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="provider-content" id="sqlite-content">
+      <div class="test-grid">
+        <div class="test-section">
+          <h3>Basic Operations</h3>
+          <div class="form-group">
+            <label>Table Name:</label>
+            <input type="text" id="sqlite-table" value="test_table" placeholder="Table name">
+          </div>
+          <div class="form-group">
+            <label>Key:</label>
+            <input type="text" id="sqlite-key" placeholder="Key">
+          </div>
+          <div class="form-group">
+            <label>Value (JSON):</label>
+            <textarea id="sqlite-value" placeholder='{"name": "John", "age": 30}'></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="sqliteOperations.set()">Set</button>
+            <button class="btn-success" onclick="sqliteOperations.get()">Get</button>
+            <button class="btn-danger" onclick="sqliteOperations.delete()">Delete</button>
+            <button class="btn-info" onclick="sqliteOperations.exists()">Exists</button>
+          </div>
+        </div>
+
+        <div class="test-section">
+          <h3>SQL Operations</h3>
+          <div class="form-group">
+            <label>SQL Query:</label>
+            <textarea id="sqlite-sql" placeholder="SELECT * FROM test_table WHERE age > 18"></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="sqliteOperations.query()">Execute Query</button>
+            <button class="btn-warning" onclick="sqliteOperations.createTable()">Create Table</button>
+          </div>
+        </div>
+
+        <div class="test-section">
+          <h3>Advanced Operations</h3>
+          <div class="button-group">
+            <button class="btn-info" onclick="sqliteOperations.transaction()">Test Transaction</button>
+            <button class="btn-warning" onclick="sqliteOperations.benchmark()">Run Benchmark</button>
+            <button class="btn-secondary" onclick="sqliteOperations.getStats()">Get Stats</button>
+            <button class="btn-danger" onclick="sqliteOperations.clear()">Clear Table</button>
+          </div>
+          <div class="benchmark-results" id="sqlite-benchmark-results" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-section">
+      <h3>Output</h3>
+      <div class="button-group" style="margin-bottom: 15px;">
+        <button class="btn-secondary" onclick="clearOutput()">Clear Output</button>
+        <button class="btn-info" onclick="exportOutput()">Export Output</button>
+      </div>
+      <pre id="output" class="output">Loading WebExtension DB Testing Suite...</pre>
+    </div>
+  </div>
+
+  <script src="options.js" type="module"></script>
+</body>
+</html> 
