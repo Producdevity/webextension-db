@@ -1,6 +1,6 @@
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -16,7 +16,7 @@
 /coverage
 
 # builds
-/dist
+dist
 
 # misc
 .DS_Store

@@ -1,0 +1,26 @@
+{
+  "name": "webextension-db-chrome-example",
+  "version": "1.0.0",
+  "description": "Chrome extension example using webextension-db",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js -w",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "webextension-db": "file:../.."
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/chrome": "^0.0.326",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.9.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "typescript": "^5.8.3"
+  }
+}
