@@ -1,6 +1,6 @@
 {
   "name": "webextension-db",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Unified database API for web extensions across Chrome, Firefox, and Safari with SQLite and JSON storage providers",
   "main": "dist/index.js",
