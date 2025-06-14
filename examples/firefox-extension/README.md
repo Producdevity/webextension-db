@@ -22,17 +22,20 @@ Firefox provides superior WebExtension database capabilities:
 ## Installation
 
 1. **Build the main library first**:
+
    ```bash
    cd ../../
    npm run build
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Build the extension**:
+
    ```bash
    npm run build
    ```
@@ -84,28 +87,34 @@ The extension will automatically choose the best storage backend:
 ## Advanced Features
 
 ### Search Functionality
+
 The extension includes search capabilities across all stored data:
+
 ```javascript
 browser.runtime.sendMessage({
   action: 'searchData',
-  term: 'search query'
+  term: 'search query',
 })
 ```
 
 ### Database Statistics
+
 Get real-time database usage information:
+
 ```javascript
 browser.runtime.sendMessage({
-  action: 'getStats'
+  action: 'getStats',
 })
 ```
 
 ### Performance Benchmarks
+
 Built-in performance testing:
+
 ```javascript
 browser.runtime.sendMessage({
   action: 'benchmark',
-  table: 'test'
+  table: 'test',
 })
 ```
 
@@ -124,4 +133,4 @@ browser.runtime.sendMessage({
 
 ## WebExtensions Polyfill
 
-This extension uses webextension-polyfill for cross-browser compatibility while maintaining Firefox-specific optimizations. 
+This extension uses webextension-polyfill for cross-browser compatibility while maintaining Firefox-specific optimizations.

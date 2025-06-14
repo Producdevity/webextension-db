@@ -9,17 +9,17 @@ export default [
     output: {
       file: 'dist/background.js',
       format: 'iife',
-      name: 'Background'
+      name: 'Background',
     },
     plugins: [
       resolve({
         browser: true,
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       commonjs(),
       typescript({
-        tsconfig: './tsconfig.json'
-      })
-    ]
-  }
-] 
+        tsconfig: './tsconfig.json',
+      }),
+    ],
+  },
+]

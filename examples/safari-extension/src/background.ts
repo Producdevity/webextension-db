@@ -14,7 +14,7 @@ async function initDatabase() {
     })
 
     console.log('Database initialized successfully')
-    
+
     // Example: Set up some test data
     await setupTestData()
   } catch (error) {
@@ -28,13 +28,13 @@ async function setupTestData() {
     id: 'safari-test-1',
     name: 'Safari Test Item',
     timestamp: Date.now(),
-    data: { browser: 'Safari', version: '17+' }
+    data: { browser: 'Safari', version: '17+' },
   }
-  
+
   try {
     await db.set('test-key', testData)
     console.log('Test data inserted:', testData)
-    
+
     // Retrieve and log the data
     const retrieved = await db.get('test-key')
     console.log('Retrieved data:', retrieved)
@@ -46,7 +46,7 @@ async function setupTestData() {
 // Handle extension messages
 browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   console.log('Background received message:', message)
-  
+
   switch (message.action) {
     case 'getData':
       try {
@@ -55,7 +55,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       } catch (error) {
         return { success: false, error: error.message }
       }
-      
+
     case 'setData':
       try {
         await db.set(message.key, message.value)
@@ -63,7 +63,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       } catch (error) {
         return { success: false, error: error.message }
       }
-      
+
     case 'deleteData':
       try {
         await db.delete(message.key)
@@ -71,7 +71,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       } catch (error) {
         return { success: false, error: error.message }
       }
-      
+
     case 'listKeys':
       try {
         const keys = await db.keys()
@@ -79,7 +79,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       } catch (error) {
         return { success: false, error: error.message }
       }
-      
+
     default:
       return { success: false, error: 'Unknown action' }
   }
@@ -88,4 +88,4 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 // Initialize when extension starts
 initDatabase().catch(console.error)
 
-export { db } 
+export { db }

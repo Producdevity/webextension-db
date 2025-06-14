@@ -12,13 +12,18 @@ const keyInput = document.getElementById('keyInput') as HTMLInputElement
 const valueInput = document.getElementById('valueInput') as HTMLTextAreaElement
 const setButton = document.getElementById('setButton') as HTMLButtonElement
 const getButton = document.getElementById('getButton') as HTMLButtonElement
-const deleteButton = document.getElementById('deleteButton') as HTMLButtonElement
+const deleteButton = document.getElementById(
+  'deleteButton',
+) as HTMLButtonElement
 const listButton = document.getElementById('listButton') as HTMLButtonElement
 const clearButton = document.getElementById('clearButton') as HTMLButtonElement
 const output = document.getElementById('output') as HTMLDivElement
 
 // Helper function to send messages to background script
-async function sendMessage(action: string, data: any = {}): Promise<DatabaseResponse> {
+async function sendMessage(
+  action: string,
+  data: any = {},
+): Promise<DatabaseResponse> {
   try {
     const response = await browser.runtime.sendMessage({ action, ...data })
     return response as DatabaseResponse
@@ -40,12 +45,12 @@ function displayOutput(text: string, isError: boolean = false) {
 setButton.addEventListener('click', async () => {
   const key = keyInput.value.trim()
   const valueText = valueInput.value.trim()
-  
+
   if (!key || !valueText) {
     displayOutput('Please enter both key and value', true)
     return
   }
-  
+
   let value: any
   try {
     // Try to parse as JSON, fallback to string
@@ -53,7 +58,7 @@ setButton.addEventListener('click', async () => {
   } catch {
     value = valueText
   }
-  
+
   const response = await sendMessage('setData', { key, value })
   if (response.success) {
     displayOutput(`✓ Set "${key}" successfully`)
@@ -67,12 +72,12 @@ setButton.addEventListener('click', async () => {
 // Get data
 getButton.addEventListener('click', async () => {
   const key = keyInput.value.trim()
-  
+
   if (!key) {
     displayOutput('Please enter a key', true)
     return
   }
-  
+
   const response = await sendMessage('getData', { key })
   if (response.success) {
     displayOutput(`✓ "${key}": ${JSON.stringify(response.data, null, 2)}`)
@@ -84,12 +89,12 @@ getButton.addEventListener('click', async () => {
 // Delete data
 deleteButton.addEventListener('click', async () => {
   const key = keyInput.value.trim()
-  
+
   if (!key) {
     displayOutput('Please enter a key', true)
     return
   }
-  
+
   const response = await sendMessage('deleteData', { key })
   if (response.success) {
     displayOutput(`✓ Deleted "${key}" successfully`)
@@ -121,4 +126,4 @@ clearButton.addEventListener('click', () => {
 // Initialize popup
 document.addEventListener('DOMContentLoaded', () => {
   displayOutput('Safari Extension DB Demo Ready')
-}) 
+})

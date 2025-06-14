@@ -36,6 +36,7 @@ This guide will help you create a complete Xcode project for the WebExtensionDB 
 ### 3. Copy Template Files
 
 #### Main App Files
+
 Copy these files to your main app target:
 
 ```
@@ -44,6 +45,7 @@ ContentView.swift → YourProject/
 ```
 
 #### Extension Files
+
 Copy these files to your Safari extension target:
 
 ```
@@ -53,6 +55,7 @@ App.entitlements → YourProject/
 ```
 
 #### Web Extension Files
+
 Copy the built web extension files:
 
 ```
@@ -67,6 +70,7 @@ dist/ → YourProject Extension/Resources/dist/
 
 1. Select main app target
 2. **General** tab:
+
    - Deployment Target: macOS 11.0 or later
    - Bundle Identifier: `com.webextensiondb.safari.example`
 
@@ -78,6 +82,7 @@ dist/ → YourProject Extension/Resources/dist/
 
 1. Select Safari extension target
 2. **General** tab:
+
    - Deployment Target: macOS 11.0 or later
    - Bundle Identifier: `com.webextensiondb.safari.example.Extension`
 
@@ -99,6 +104,7 @@ dist/ → YourProject Extension/Resources/dist/
 #### Update Bundle Identifiers
 
 Make sure your bundle identifiers follow this pattern:
+
 - Main App: `com.yourname.webextensiondb.safari.example`
 - Extension: `com.yourname.webextensiondb.safari.example.Extension`
 
@@ -158,16 +164,19 @@ WebExtensionDB Safari Example/
 ## Common Issues & Solutions
 
 ### Extension Not Loading
+
 - Check bundle identifiers match between app and extension
 - Verify all web extension files are in the Resources folder
 - Ensure deployment target is macOS 11.0+
 
 ### Build Errors
+
 - Clean build folder (⌘+Shift+K)
 - Check all file references in Xcode
 - Verify Swift files are added to correct targets
 
 ### Safari Extension Not Appearing
+
 - Check Safari preferences > Extensions
 - Enable "Allow Unsigned Extensions" in Safari Development menu
 - Restart Safari after building
@@ -175,10 +184,12 @@ WebExtensionDB Safari Example/
 ## Distribution
 
 ### Development Testing
+
 - Archive the app (Product > Archive)
 - Distribute locally for testing
 
 ### App Store Release
+
 - Requires Apple Developer Program ($99/year)
 - Follow App Store Review Guidelines
 - Submit through App Store Connect
@@ -190,4 +201,4 @@ WebExtensionDB Safari Example/
 3. **Update Xcode**: Copy new `dist/` files to Xcode project
 4. **Test**: Build and run in Xcode
 
-For more information, see the main README.md file. 
+For more information, see the main README.md file.

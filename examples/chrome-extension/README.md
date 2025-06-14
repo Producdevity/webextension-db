@@ -6,7 +6,7 @@ A comprehensive Chrome extension example demonstrating the usage of the WebExten
 
 - **TypeScript Implementation**: Full TypeScript support with proper type definitions
 - **Dual Provider Support**: Test both JSON and SQLite database providers
-- **Comprehensive Testing Interface**: 
+- **Comprehensive Testing Interface**:
   - Simple popup for basic operations
   - Full options page for advanced testing
 - **Modern UI**: Clean, responsive interface with proper styling
@@ -30,18 +30,21 @@ src/
 ### Components
 
 1. **Background Script** (`background.ts`)
+
    - Initializes both JSON and SQLite providers
    - Handles all database operations
    - Provides comprehensive API for testing
    - Includes benchmarking and transaction support
 
 2. **Popup Interface** (`popup.ts` + `popup.html`)
+
    - Simple interface for basic operations
    - Provider selection (JSON/SQLite)
    - Basic CRUD operations
    - Quick access to full testing suite
 
 3. **Options Page** (`options.ts` + `options.html`)
+
    - Comprehensive testing interface
    - Advanced query operations (JSON provider)
    - SQL query execution (SQLite provider)
@@ -58,11 +61,13 @@ src/
 ### 1. Build the Extension
 
 From the main project directory:
+
 ```bash
 npm run build:example:chrome
 ```
 
 Or from this directory:
+
 ```bash
 npm install
 npm run build
@@ -79,6 +84,7 @@ npm run build
 ### 3. Testing the Extension
 
 #### Basic Testing (Popup)
+
 1. Click the extension icon in the toolbar
 2. Select a provider (JSON or SQLite)
 3. Test basic operations:
@@ -89,6 +95,7 @@ npm run build
    - View provider statistics
 
 #### Advanced Testing (Options Page)
+
 1. Click "Open Full Testing Suite" in the popup
 2. Or right-click the extension icon → "Options"
 3. Switch between provider tabs
@@ -98,13 +105,15 @@ npm run build
    - Export test results
 
 #### Content Script Testing
+
 1. Open any webpage
 2. Open browser console (F12)
 3. Use the global `webExtensionDB` object:
+
    ```javascript
    // Store page visit data
    webExtensionDB.storePageVisit()
-   
+
    // Get stored data count
    webExtensionDB.getStoredDataCount()
    ```
@@ -112,6 +121,7 @@ npm run build
 ## Provider Capabilities
 
 ### JSON Provider ✅ (Fully Implemented)
+
 - **Basic Operations**: get, set, delete, exists, clear
 - **Advanced Queries**: MongoDB-style query operators
 - **Bulk Operations**: Batch insert/update operations
@@ -119,6 +129,7 @@ npm run build
 - **Storage Backends**: Chrome Storage API, IndexedDB fallback
 
 ### SQLite Provider ⚠️ (Chrome Extension Limitations)
+
 - **Basic Operations**: get, set, delete, exists, clear (via IDatabase interface)
 - **SQL Queries**: Raw SQL execution (not yet implemented)
 - **Transactions**: Transaction support (not yet implemented)
@@ -132,47 +143,53 @@ npm run build
 
 ```typescript
 // Basic operations
-await db.set('users', 'user1', { name: 'John', age: 30 });
-const user = await db.get('users', 'user1');
-await db.delete('users', 'user1');
+await db.set('users', 'user1', { name: 'John', age: 30 })
+const user = await db.get('users', 'user1')
+await db.delete('users', 'user1')
 
 // Advanced queries
-const adults = await db.find('users', { age: { $gte: 18 } });
-const count = await db.count('users', { active: true });
+const adults = await db.find('users', { age: { $gte: 18 } })
+const count = await db.count('users', { active: true })
 
 // Transactions
 await db.transaction('readwrite', async (tx) => {
-  await tx.set('users', 'user1', userData1);
-  await tx.set('users', 'user2', userData2);
-});
+  await tx.set('users', 'user1', userData1)
+  await tx.set('users', 'user2', userData2)
+})
 ```
 
 ### SQLite Provider Examples (Planned)
 
 ```typescript
 // Basic operations (available now via IDatabase interface)
-await db.set('users', 'user1', { name: 'John', age: 30 });
-const user = await db.get('users', 'user1');
+await db.set('users', 'user1', { name: 'John', age: 30 })
+const user = await db.get('users', 'user1')
 
 // SQL operations (planned)
-await db.query('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)');
-const results = await db.query('SELECT * FROM users WHERE age > ?', [18]);
+await db.query(
+  'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)',
+)
+const results = await db.query('SELECT * FROM users WHERE age > ?', [18])
 ```
 
 ## Development
 
 ### Building
+
 ```bash
 npm run build
 ```
 
 ### Development Mode
+
 ```bash
 npm run build -- --watch
 ```
 
 ### TypeScript Configuration
+
 The extension uses TypeScript with:
+
 - ES2020 target
 - ESNext modules
 - Chrome extension types
@@ -183,10 +200,12 @@ The extension uses TypeScript with:
 ### Common Issues
 
 1. **Extension won't load**
+
    - Ensure you're loading the `dist` folder, not the `src` folder
    - Check that all files are present in `dist` after building
 
 2. **Database operations fail**
+
    - Check the browser console for errors
    - Verify the background script is running
    - Ensure proper permissions in manifest.json
@@ -197,11 +216,13 @@ The extension uses TypeScript with:
 
 ### Debugging
 
-1. **Background Script**: 
+1. **Background Script**:
+
    - Go to `chrome://extensions/`
    - Click "Inspect views: service worker" under the extension
 
 2. **Popup/Options**:
+
    - Right-click on popup/options page
    - Select "Inspect"
 
@@ -223,4 +244,4 @@ The extension uses TypeScript with:
 - Main package: `../../src/`
 - JSON Provider: `../../src/providers/json/JsonProvider.ts`
 - SQLite Provider: `../../src/providers/sql/SqlProvider.ts`
-- Browser Detection: `../../src/utils/browser-detection.ts` 
+- Browser Detection: `../../src/utils/browser-detection.ts`

@@ -3,17 +3,14 @@
   "name": "WebExtension DB Example",
   "version": "1.0.0",
   "description": "Example Chrome extension using webextension-db",
-  
-  "permissions": [
-    "storage",
-    "unlimitedStorage"
-  ],
-  
+
+  "permissions": ["storage", "unlimitedStorage"],
+
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
-  
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -21,18 +18,18 @@
       "type": "module"
     }
   ],
-  
+
   "action": {
     "default_popup": "popup.html",
     "default_title": "WebExtension DB Demo"
   },
-  
+
   "options_page": "options.html",
-  
+
   "web_accessible_resources": [
     {
       "resources": ["*.js"],
       "matches": ["<all_urls>"]
     }
   ]
-} 
+}

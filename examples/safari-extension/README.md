@@ -18,6 +18,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
 ### Option 1: Using Xcode's Built-in Template (Recommended)
 
 1. **Create Xcode Project**:
+
    ```bash
    # Open Xcode and create new project
    # Choose: macOS > App > Safari Extension App
@@ -26,6 +27,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
    ```
 
 2. **Replace Extension Files**:
+
    - Copy built files from `dist/` to Xcode project's extension folder
    - Copy `manifest.json` and `popup.html` to extension folder
    - Update Info.plist with proper permissions
@@ -37,6 +39,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
 ### Option 2: Manual Xcode Setup
 
 1. **Build the web extension first**:
+
    ```bash
    cd ../../
    npm run build
@@ -45,6 +48,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
    ```
 
 2. **Create Xcode project structure**:
+
    ```bash
    # We'll create this structure for you
    mkdir -p Safari-App/Safari-Extension
@@ -57,6 +61,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
 ### Creating the App Wrapper
 
 1. **New Xcode Project**:
+
    - Open Xcode
    - File > New > Project
    - macOS > App
@@ -65,6 +70,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
    - Bundle Identifier: `com.webextensiondb.safari.example`
 
 2. **Add Safari Extension Target**:
+
    - Select project in navigator
    - Click "+" to add target
    - Choose "Safari Extension" (not "Safari Extension App")
@@ -103,15 +109,18 @@ This is an example Safari extension that demonstrates how to use `webextension-d
 ### Building & Testing
 
 1. **Build web extension**:
+
    ```bash
    npm run build
    ```
 
 2. **Update Xcode project**:
+
    - Copy new `dist/` files to Xcode extension folder
    - Refresh Xcode project
 
 3. **Run in Xcode**:
+
    ```bash
    # Or press ⌘+R in Xcode
    xcodebuild -scheme "WebExtensionDB Safari Example" -configuration Debug
@@ -133,6 +142,7 @@ This is an example Safari extension that demonstrates how to use `webextension-d
 ### Development Distribution
 
 1. **Archive in Xcode**:
+
    - Product > Archive
    - Distribute App > Copy App
 
@@ -196,17 +206,20 @@ Safari has some unique characteristics for web extensions:
 ### For Development (Manual Setup)
 
 1. **Build the main library first**:
+
    ```bash
    cd ../../
    npm run build
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Build the extension**:
+
    ```bash
    npm run build
    ```
@@ -269,16 +282,19 @@ The extension will automatically choose the best storage backend:
 
 ### Common Issues
 
-- **Extension not loading**: 
+- **Extension not loading**:
+
   - Check Safari's extension preferences
   - Ensure unsigned extensions are allowed (Development menu)
   - Verify Xcode project builds successfully
 
-- **Database errors**: 
+- **Database errors**:
+
   - Check browser console for detailed error messages
   - Verify webextension-db main library is built
 
-- **Build issues**: 
+- **Build issues**:
+
   - Ensure main library is built first: `npm run build` in root directory
   - Check Xcode project file references are correct
   - Verify all dist files are copied to Xcode extension folder
@@ -299,4 +315,4 @@ The extension will automatically choose the best storage backend:
 - **Safari 14+** (recommended)
 - **Safari 17+** for full WASM support (if using SQLite)
 - **macOS 11+** for Safari Extension development
-- **iOS 14+** for Safari extensions on iOS (requires additional setup) 
+- **iOS 14+** for Safari extensions on iOS (requires additional setup)

@@ -7,7 +7,7 @@ const userSchema = {
   name: { type: 'TEXT' as const, notNull: true },
   email: { type: 'TEXT' as const, unique: true, notNull: true },
   age: { type: 'INTEGER' as const },
-  created_at: { type: 'TEXT' as const, defaultValue: new Date().toISOString() }
+  created_at: { type: 'TEXT' as const, defaultValue: new Date().toISOString() },
 }
 
 const postSchema = {
@@ -15,7 +15,7 @@ const postSchema = {
   title: { type: 'TEXT' as const, notNull: true },
   content: { type: 'TEXT' as const },
   user_id: { type: 'INTEGER' as const, notNull: true },
-  published: { type: 'BOOLEAN' as const, defaultValue: false }
+  published: { type: 'BOOLEAN' as const, defaultValue: false },
 }
 
 async function ormExample() {
@@ -24,7 +24,7 @@ async function ormExample() {
   // Create database - will use SQLite on Chrome/Firefox, JSON on Safari
   const db = await createDatabase({
     name: 'blog_app',
-    provider: 'sqlite' // Auto-fallback to JSON on Safari
+    provider: 'sqlite', // Auto-fallback to JSON on Safari
   })
 
   console.log(`📊 Using provider: ${db.provider}`)
@@ -43,26 +43,36 @@ async function ormExample() {
 
   // INSERT operations
   console.log('\n📝 Inserting users...')
-  
+
   const user1 = await Users.insert({
     name: 'John Doe',
     email: 'john@example.com',
-    age: 30
+    age: 30,
   })
   console.log('Created user:', user1)
 
   const user2 = await Users.insert({
     name: 'Jane Smith',
     email: 'jane@example.com',
-    age: 25
+    age: 25,
   })
   console.log('Created user:', user2)
 
   // Batch insert
   const morePosts = await Posts.insertMany([
-    { title: 'First Post', content: 'Hello World!', user_id: user1.id, published: true },
+    {
+      title: 'First Post',
+      content: 'Hello World!',
+      user_id: user1.id,
+      published: true,
+    },
     { title: 'Second Post', content: 'Learning ORM', user_id: user1.id },
-    { title: 'Jane\'s Post', content: 'My thoughts', user_id: user2.id, published: true }
+    {
+      title: "Jane's Post",
+      content: 'My thoughts',
+      user_id: user2.id,
+      published: true,
+    },
   ])
   console.log('Created posts:', morePosts)
 
@@ -76,13 +86,13 @@ async function ormExample() {
   // Find with conditions
   const publishedPosts = await Posts.findAll({
     where: [{ column: 'published', operator: '=', value: true }],
-    orderBy: [{ column: 'title', direction: 'ASC' }]
+    orderBy: [{ column: 'title', direction: 'ASC' }],
   })
   console.log('Published posts:', publishedPosts)
 
   // Find one user
   const youngUser = await Users.findOne({
-    where: [{ column: 'age', operator: '<', value: 28 }]
+    where: [{ column: 'age', operator: '<', value: 28 }],
   })
   console.log('Young user:', youngUser)
 
@@ -94,9 +104,9 @@ async function ormExample() {
   const userPosts = await Posts.findAll({
     where: [
       { column: 'user_id', operator: '=', value: user1.id },
-      { column: 'published', operator: '=', value: false }
+      { column: 'published', operator: '=', value: false },
     ],
-    limit: 5
+    limit: 5,
   })
   console.log('User 1 unpublished posts:', userPosts)
 
@@ -110,7 +120,7 @@ async function ormExample() {
   // Update with conditions
   const publishedCount = await Posts.update(
     { published: true },
-    { where: [{ column: 'user_id', operator: '=', value: user1.id }] }
+    { where: [{ column: 'user_id', operator: '=', value: user1.id }] },
   )
   console.log('Published posts count:', publishedCount)
 
@@ -121,7 +131,7 @@ async function ormExample() {
   console.log('Total users:', totalUsers)
 
   const publishedPostsCount = await Posts.count({
-    where: [{ column: 'published', operator: '=', value: true }]
+    where: [{ column: 'published', operator: '=', value: true }],
   })
   console.log('Published posts count:', publishedPostsCount)
 
@@ -134,7 +144,7 @@ async function ormExample() {
 
   // Delete with conditions
   const deletedCount = await Posts.delete({
-    where: [{ column: 'published', operator: '=', value: false }]
+    where: [{ column: 'published', operator: '=', value: false }],
   })
   console.log('Deleted unpublished posts:', deletedCount)
 
@@ -145,12 +155,12 @@ async function ormExample() {
 
   // Advanced: Direct database access for complex operations
   console.log('\n🔧 Advanced operations...')
-  
+
   if (db.provider === 'sqlite') {
     // Raw SQL only works on SQLite (Chrome/Firefox)
     try {
       const rawResults = await db.query(
-        'SELECT u.name, COUNT(p.id) as post_count FROM users u LEFT JOIN posts p ON u.id = p.user_id GROUP BY u.id, u.name'
+        'SELECT u.name, COUNT(p.id) as post_count FROM users u LEFT JOIN posts p ON u.id = p.user_id GROUP BY u.id, u.name',
       )
       console.log('User post counts (SQL):', rawResults)
     } catch (error) {
@@ -158,18 +168,18 @@ async function ormExample() {
     }
   } else {
     console.log('Raw SQL not available in JSON mode (Safari fallback)')
-    
+
     // Simulate the same query using ORM
     const users = await Users.findAll()
     const userPostCounts = []
-    
+
     for (const user of users) {
       const postCount = await Posts.count({
-        where: [{ column: 'user_id', operator: '=', value: user.id }]
+        where: [{ column: 'user_id', operator: '=', value: user.id }],
       })
       userPostCounts.push({ name: user.name, post_count: postCount })
     }
-    
+
     console.log('User post counts (ORM):', userPostCounts)
   }
 
@@ -179,4 +189,4 @@ async function ormExample() {
 // Run the example
 ormExample().catch(console.error)
 
-export { ormExample } 
+export { ormExample }
