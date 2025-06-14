@@ -1,14 +1,15 @@
 import browser from 'webextension-polyfill'
-import { WebExtensionDB, createDatabase } from 'webextension-db'
+import { createDatabase } from 'webextension-db'
 
 // Initialize database for Safari extension
-let db: WebExtensionDB
+let db: any
 
 async function initDatabase() {
   try {
-    // Safari typically works better with JSON provider due to WebAssembly restrictions
-    db = await createDatabase('safari-example', {
-      provider: 'auto', // Will auto-detect and prefer browser storage for Safari
+    // Safari works well with JSON provider using IndexedDB for large storage capacity
+    db = await createDatabase({
+      name: 'safari-example',
+      provider: 'json', // Use JSON provider - now defaults to IndexedDB for Safari
       version: 1,
     })
 

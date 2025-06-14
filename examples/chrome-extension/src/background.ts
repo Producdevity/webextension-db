@@ -32,7 +32,7 @@ class DatabaseManager {
       });
       console.log('JSON Database initialized');
 
-      // Initialize SQL Provider (skeleton for now)
+      // Initialize SQL Provider with fallback handling for Chrome extensions
       try {
         this.sqlDb = await createDatabase({
           name: 'chrome-extension-sql-db',
@@ -41,8 +41,14 @@ class DatabaseManager {
         });
         console.log('SQL Database initialized');
       } catch (error) {
-        console.warn('SQL Database not available:', error);
-        this.sqlDb = null;
+        console.warn('SQL Database not available in Chrome extension service worker context, using JSON provider as fallback:', error);
+        // Use JSON provider as SQL fallback in Chrome extensions
+        this.sqlDb = await createDatabase({
+          name: 'chrome-extension-sql-fallback-db',
+          provider: 'json',
+          version: 1
+        });
+        console.log('SQL Database fallback (JSON provider) initialized');
       }
     } catch (error) {
       console.error('Failed to initialize databases:', error);
@@ -110,7 +116,7 @@ class DatabaseManager {
         case 'getStats':
           const stats = {
             provider,
-            isReady: await db.isReady(),
+            isReady: db.isReady,
             capabilities: {
               json: this.jsonDb !== null,
               sqlite: this.sqlDb !== null

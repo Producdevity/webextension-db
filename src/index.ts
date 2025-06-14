@@ -1,3 +1,30 @@
+/**
+ * @fileoverview
+ * WebExtension DB - Main entry point for unified database API for web extensions.
+ *
+ * This library provides a unified database interface that works across Chrome, Firefox,
+ * and Safari web extensions, automatically selecting the best available storage provider
+ * based on browser capabilities.
+ *
+ * @example
+ * ```typescript
+ * import { createDatabase } from 'webextension-db';
+ *
+ * const db = await createDatabase({
+ *   name: 'my-extension-db',
+ *   provider: 'auto',
+ *   version: 1
+ * });
+ *
+ * await db.set('users', 'user123', { name: 'John', email: 'john@example.com' });
+ * const user = await db.get('users', 'user123');
+ * ```
+ *
+ * @author WebExtension DB Contributors
+ * @version 0.1.0
+ * @since 1.0.0
+ */
+
 // Main exports
 export * from './types/index'
 export * from './utils/browser-detection'
@@ -30,7 +57,55 @@ import { JsonProvider } from './providers/json/JsonProvider'
 import { SqlProvider } from './providers/sql/SqlProvider'
 
 /**
- * Create a database instance with automatic provider selection
+ * Creates a new database instance with automatic provider detection.
+ *
+ * This is the main entry point for creating database connections. The function
+ * automatically detects browser capabilities and selects the best available
+ * storage provider unless explicitly specified.
+ *
+ * @param config - Database configuration options
+ * @param config.name - Unique database name (must be valid identifier)
+ * @param config.provider - Storage provider selection ('auto', 'sqlite', 'json', 'browser-storage')
+ * @param config.version - Database schema version for migrations
+ * @param config.options - Provider-specific configuration options
+ *
+ * @returns Promise that resolves to an IDatabase instance
+ *
+ * @throws {Error} When provider initialization fails
+ * @throws {Error} When database name is invalid
+ * @throws {Error} When unsupported provider is specified
+ *
+ * @example
+ * ```typescript
+ * // Auto-detect best provider
+ * const db = await createDatabase({
+ *   name: 'my-extension-db',
+ *   provider: 'auto',
+ *   version: 1
+ * });
+ *
+ * // Force specific provider
+ * const sqliteDb = await createDatabase({
+ *   name: 'advanced-db',
+ *   provider: 'sqlite',
+ *   version: 2,
+ *   options: { enableWAL: true }
+ * });
+ *
+ * // JSON provider with custom options
+ * const jsonDb = await createDatabase({
+ *   name: 'simple-db',
+ *   provider: 'json',
+ *   options: { maxStorageSize: 100 * 1024 * 1024 } // 100MB
+ * });
+ * ```
+ *
+ * @see {@link IDatabase} for available database operations
+ * @see {@link DatabaseConfig} for configuration options
+ * @see {@link detectBrowser} for browser detection
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function createDatabase(
   config: DatabaseConfig,
@@ -73,11 +148,27 @@ export async function createDatabase(
 // Legacy wrapper functions removed - providers implement IDatabase directly
 
 /**
- * Utility functions
+ * Browser detection and capability utilities.
+ *
+ * These functions help determine the current browser environment and available
+ * storage capabilities, useful for conditional feature detection.
+ *
+ * @namespace BrowserUtils
+ * @since 1.0.0
+ * @public
  */
 export { detectBrowser, getBrowserCapabilities, getBestStorageBackend }
 
 /**
- * Version information
+ * Current library version.
+ *
+ * @example
+ * ```typescript
+ * import { version } from 'webextension-db';
+ * console.log(`Using WebExtension DB v${version}`);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const version = '0.1.0'

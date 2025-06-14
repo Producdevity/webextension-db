@@ -87,12 +87,18 @@ async function detectSQLiteCapabilities(): Promise<SQLiteCapabilities> {
   } else {
     // Chrome/Firefox - generally good support
     if (isExtension && isServiceWorker) {
-      // Chrome extension service workers need special handling
-      if (hasOPFS && hasSyncAccessHandle) {
-        // Use OPFS if available, but may need offscreen documents
-        recommendedBackend = 'opfs'
+      // Chrome extension service workers have WASM loading limitations
+      // Force fallback to JSON provider for better reliability
+      if (browserType === 'chrome') {
+        canUseSQLite = false
+        fallbackRequired = true
       } else {
-        recommendedBackend = 'indexeddb'
+        // Firefox extension service workers may work better
+        if (hasOPFS && hasSyncAccessHandle) {
+          recommendedBackend = 'opfs'
+        } else {
+          recommendedBackend = 'indexeddb'
+        }
       }
     } else if (hasOPFS && hasSyncAccessHandle && hasWorkers) {
       recommendedBackend = 'opfs'

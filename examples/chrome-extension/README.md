@@ -118,11 +118,13 @@ npm run build
 - **Transactions**: ACID transaction support
 - **Storage Backends**: Chrome Storage API, IndexedDB fallback
 
-### SQLite Provider ⚠️ (Skeleton Implementation)
+### SQLite Provider ⚠️ (Chrome Extension Limitations)
 - **Basic Operations**: get, set, delete, exists, clear (via IDatabase interface)
 - **SQL Queries**: Raw SQL execution (not yet implemented)
 - **Transactions**: Transaction support (not yet implemented)
-- **Storage Backends**: WASM SQLite (planned), IndexedDB fallback
+- **Storage Backends**: WASM SQLite (limited in Chrome extensions), JSON provider fallback
+
+**⚠️ Important Note**: SQLite WASM has known limitations in Chrome extension service workers (Manifest V3). The SQLite provider will automatically fall back to using the JSON provider in Chrome extensions to ensure reliability. This provides the same IDatabase interface while using IndexedDB for storage.
 
 ## Example Operations
 

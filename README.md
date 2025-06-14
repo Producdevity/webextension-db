@@ -57,7 +57,7 @@ await db.clear('users');
 |---------|----------------|---------|
 | Chrome | Chrome Storage API, IndexedDB | ✅ Supported |
 | Firefox | Browser Storage API, IndexedDB | ✅ Supported |
-| Safari | Browser Storage API, IndexedDB | ✅ Supported |
+| Safari | IndexedDB (preferred), Browser Storage API | ✅ Supported |
 | Edge | Chrome Storage API, IndexedDB | ✅ Supported |
 
 ## API Reference
@@ -243,7 +243,7 @@ By default, the package automatically selects the best storage backend:
 
 1. **Chrome**: Chrome Storage API (with unlimitedStorage) → IndexedDB
 2. **Firefox**: Browser Storage API → IndexedDB  
-3. **Safari**: Browser Storage API → IndexedDB
+3. **Safari**: IndexedDB (preferred for large storage) → Browser Storage API (10MB limit)
 
 ### Manual Selection
 

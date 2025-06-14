@@ -185,7 +185,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 Safari has some unique characteristics for web extensions:
 
 1. **WebAssembly limitations**: Safari may have restrictions on WASM in service workers
-2. **Storage preferences**: Safari works well with browser.storage API and IndexedDB
+2. **Storage preferences**: Safari prioritizes IndexedDB for large storage capacity (browser.storage has 10MB limit)
 3. **Manifest format**: Uses Manifest V2 format
 4. **Content Security Policy**: Requires specific CSP for WASM support
 5. **App wrapper required**: Must be packaged as macOS/iOS app

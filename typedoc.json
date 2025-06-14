@@ -1,0 +1,38 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "WebExtension DB API Documentation",
+  "theme": "default",
+  "includeVersion": true,
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "readme": "README.md",
+  "categorizeByGroup": true,
+  "defaultCategory": "API",
+  "categoryOrder": [
+    "Database",
+    "Storage Providers", 
+    "ORM",
+    "Browser Detection",
+    "Types",
+    "*"
+  ],
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Project",
+    "Module", 
+    "Namespace",
+    "Enum",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Variable",
+    "Function",
+    "Accessor",
+    "Method"
+  ]
+} 
