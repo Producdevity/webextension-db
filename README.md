@@ -302,6 +302,7 @@ Check out the [examples](./examples) directory for complete working examples:
 - [Basic Usage](./examples/basic-usage.js)
 - [Chrome Extension](./examples/chrome-extension/)
 - [Firefox Extension](./examples/firefox-extension/)
+- [Safari Extension](./examples/safari-extension/)
 
 ## Contributing
 
