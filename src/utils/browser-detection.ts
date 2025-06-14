@@ -112,8 +112,8 @@ export function getBrowserCapabilities(
       capabilities.maxStorageSize = capabilities.hasIndexedDB
         ? Infinity // IndexedDB has no fixed limit in Safari
         : capabilities.hasBrowserStorage
-        ? 10 * 1024 * 1024 // Browser storage is limited to ~10MB
-        : 5 * 1024 * 1024
+          ? 10 * 1024 * 1024 // Browser storage is limited to ~10MB
+          : 5 * 1024 * 1024
       // Prioritize IndexedDB over browser storage for larger capacity
       capabilities.supportedBackends = ['indexeddb', 'browser-storage']
       // Safari has limited OPFS support
@@ -168,14 +168,14 @@ export function getBestStorageBackend(
   if (preferredType === 'json') {
     // For JSON, prefer IndexedDB for larger capacity, fallback to extension storage
     const browser = detectBrowser()
-    
+
     // For Safari, prefer IndexedDB to avoid 10MB browser storage limit
     if (browser === 'safari') {
       if (capabilities.hasIndexedDB) return 'indexeddb'
       if (capabilities.hasBrowserStorage) return 'browser-storage'
       return 'localstorage'
     }
-    
+
     // For Chrome/Firefox, prefer extension storage for unlimited capacity
     if (capabilities.hasChromeStorage) return 'chrome-storage'
     if (capabilities.hasBrowserStorage) return 'browser-storage'
@@ -190,14 +190,14 @@ export function getBestStorageBackend(
   if (browser === 'chrome' && capabilities.hasChromeStorage) {
     return 'chrome-storage'
   }
-  
+
   // For Safari, prefer IndexedDB to avoid browser storage 10MB limit
   if (browser === 'safari') {
     if (capabilities.hasIndexedDB) return 'indexeddb'
     if (capabilities.hasBrowserStorage) return 'browser-storage'
     return 'localstorage'
   }
-  
+
   // For Firefox, prefer browser storage for unlimited capacity
   if (browser === 'firefox' && capabilities.hasBrowserStorage) {
     return 'browser-storage'

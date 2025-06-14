@@ -9,18 +9,18 @@ export default [
     output: {
       file: 'dist/background.js',
       format: 'iife',
-      name: 'Background'
+      name: 'Background',
     },
     plugins: [
       resolve({
         browser: true,
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       commonjs(),
       typescript({
-        tsconfig: './tsconfig.json'
-      })
-    ]
+        tsconfig: './tsconfig.json',
+      }),
+    ],
   },
   // Popup script
   {
@@ -28,17 +28,17 @@ export default [
     output: {
       file: 'dist/popup.js',
       format: 'iife',
-      name: 'Popup'
+      name: 'Popup',
     },
     plugins: [
       resolve({
         browser: true,
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       commonjs(),
       typescript({
-        tsconfig: './tsconfig.json'
-      })
-    ]
-  }
-] 
+        tsconfig: './tsconfig.json',
+      }),
+    ],
+  },
+]
