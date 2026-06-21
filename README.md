@@ -12,6 +12,8 @@ pnpm add webextension-db
 
 ## Usage
 
+In an extension page, content script, or service worker, the default backend selects IndexedDB when it is available:
+
 ```ts
 import { createDatabase, isJsonObject } from "webextension-db";
 
@@ -47,6 +49,8 @@ const db = await createDatabase({
   backend: "memory",
 });
 ```
+
+Use `memory` for Node.js scripts and tests that do not provide browser storage APIs.
 
 Extension storage can also be selected directly:
 
