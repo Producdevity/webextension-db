@@ -1,5 +1,9 @@
 export { createDatabase } from "./database";
-export type { ExtensionStorageArea, ExtensionStorageKeys } from "./environment";
+export type {
+  ExtensionStorageArea,
+  ExtensionStorageKeys,
+  ExtensionStorageResult,
+} from "./environment";
 export {
   detectStorageCapabilities,
   getBestStorageBackend,

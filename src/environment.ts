@@ -2,13 +2,20 @@ import { ConfigurationError } from "./errors";
 import type { ExtensionStorageAreaName, StorageBackendType, StorageCapabilities } from "./types";
 
 export type ExtensionStorageKeys = string | string[] | Record<string, unknown> | null;
+export type ExtensionStorageResult<T> = Promise<T> | undefined;
 
 export interface ExtensionStorageArea {
-  get(keys?: ExtensionStorageKeys): Promise<Record<string, unknown>>;
-  set(items: Record<string, unknown>): Promise<void>;
-  remove(keys: string | string[]): Promise<void>;
-  clear(): Promise<void>;
-  getBytesInUse?(keys?: string | string[] | null): Promise<number>;
+  get(
+    keys?: ExtensionStorageKeys,
+    callback?: (items: Record<string, unknown>) => unknown,
+  ): ExtensionStorageResult<Record<string, unknown>>;
+  set(items: Record<string, unknown>, callback?: () => unknown): ExtensionStorageResult<void>;
+  remove(keys: string | string[], callback?: () => unknown): ExtensionStorageResult<void>;
+  clear(callback?: () => unknown): ExtensionStorageResult<void>;
+  getBytesInUse?(
+    keys?: string | string[] | null,
+    callback?: (bytesInUse: number) => unknown,
+  ): ExtensionStorageResult<number>;
 }
 
 function isRecord(value: unknown): value is Record<PropertyKey, unknown> {
