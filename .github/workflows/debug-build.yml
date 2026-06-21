@@ -1,0 +1,58 @@
+name: Debug Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      node-version:
+        description: Node.js version used for the debug package
+        required: true
+        default: "24"
+        type: choice
+        options:
+          - "20"
+          - "22"
+          - "24"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package debug build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify package
+        run: pnpm verify
+
+      - name: Pack package
+        run: |
+          mkdir -p artifacts
+          pnpm pack --pack-destination artifacts
+
+      - name: Upload debug package
+        uses: actions/upload-artifact@v4
+        with:
+          name: webextension-db-debug-${{ github.sha }}
+          path: artifacts/*.tgz
+          if-no-files-found: error
+          retention-days: 14
