@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "WebExtension DB Chrome Example",
+  "description": "Stores extension settings with webextension-db and chrome.storage.",
+  "version": "1.0.0",
+  "permissions": ["storage"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "WebExtension DB"
+  }
+}

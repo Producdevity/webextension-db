@@ -77,6 +77,8 @@ const policyDb = await createDatabase({
 const policy = await policyDb.get("policies", "homepage");
 ```
 
+Complete Chrome, Firefox, and Safari extension examples are available in `examples/extensions`.
+
 ## API
 
 ### `createDatabase(config)`

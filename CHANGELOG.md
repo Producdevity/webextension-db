@@ -26,6 +26,7 @@ All notable changes to this project are recorded here.
 - A manual debug build workflow that verifies the package, creates a tarball, and uploads it as a workflow artifact.
 - Compatibility coverage for callback-based extension storage APIs and `runtime.lastError` failures.
 - Support for `storage.session`, read-only `storage.managed`, and `StorageArea.getKeys()` when available.
+- Chrome, Firefox, and Safari browser-extension examples.
 
 ## [0.1.1] - 2026-06-21
 
