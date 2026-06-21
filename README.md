@@ -1,313 +1,153 @@
 # WebExtension DB
 
-A unified database API for web extensions that works seamlessly across Chrome, Firefox, and Safari. This package provides a consistent interface for persistent data storage in browser extensions, automatically handling browser differences and selecting the best available storage backend.
+WebExtension DB is a small TypeScript library for persistent JSON data in browser extensions. It uses IndexedDB by default and can use `chrome.storage` or `browser.storage` when a project explicitly chooses those backends.
 
-## Features
+The package does not expose a SQL or ORM layer. Those APIs were removed because they were not proven against the browser environments this package targets.
 
-- 🌐 **Cross-browser compatibility** - Works on Chrome, Firefox, and Safari
-- 🔄 **Automatic provider selection** - Chooses the best storage backend for each browser
-- 💾 **Multiple storage options** - IndexedDB, Chrome Storage, Browser Storage APIs
-- 📊 **JSON and SQLite support** - Flexible data storage options
-- 🛡️ **Type-safe** - Full TypeScript support with comprehensive type definitions
-- ⚡ **High performance** - Optimized for extension environments
-- 🔧 **Easy to use** - Simple, consistent API across all browsers
-
-## Installation
+## Install
 
 ```bash
-npm install webextension-db
+pnpm add webextension-db
 ```
 
-## Quick Start
+## Usage
 
-```javascript
-import { createDatabase } from 'webextension-db';
+```ts
+import { createDatabase, isJsonObject } from "webextension-db";
 
-// Create a database with automatic provider selection
 const db = await createDatabase({
-  name: 'my-extension-db',
-  provider: 'auto',  // Automatically choose the best provider
-  version: 1
+  name: "settings-db",
 });
 
-// Store data
-await db.set('users', 'user1', {
-  name: 'John Doe',
-  email: 'john@example.com',
-  preferences: { theme: 'dark' }
+await db.set("settings", "theme", {
+  mode: "dark",
+  sync: true,
 });
 
-// Retrieve data
-const user = await db.get('users', 'user1');
-console.log(user); // { name: 'John Doe', email: 'john@example.com', ... }
+const value = await db.get("settings", "theme");
 
-// Check if data exists
-const exists = await db.exists('users', 'user1');
-
-// Delete data
-await db.delete('users', 'user1');
-
-// Clear entire table
-await db.clear('users');
+if (value !== undefined && isJsonObject(value)) {
+  console.log(JSON.stringify(value));
+}
 ```
 
-## Browser Support
+## Backends
 
-| Browser | Storage Backend | Status |
-|---------|----------------|---------|
-| Chrome | Chrome Storage API, IndexedDB | ✅ Supported |
-| Firefox | Browser Storage API, IndexedDB | ✅ Supported |
-| Safari | IndexedDB (preferred), Browser Storage API | ✅ Supported |
-| Edge | Chrome Storage API, IndexedDB | ✅ Supported |
+By default, `createDatabase` selects the first durable backend available in this order:
 
-## API Reference
+1. `indexeddb`
+2. `chrome-storage`
+3. `browser-storage`
 
-### createDatabase(config)
+Tests and temporary tools can opt into the in-memory backend:
 
-Creates a new database instance.
-
-```javascript
+```ts
 const db = await createDatabase({
-  name: 'my-db',           // Database name
-  provider: 'auto',        // 'auto', 'json', 'sqlite'
-  version: 1,              // Schema version
-  backend: 'indexeddb',    // Optional: force specific backend
-  options: {
-    area: 'local',         // 'local', 'sync', 'managed'
-    autoSave: true,        // Auto-save for JSON provider
-    saveInterval: 5000     // Save interval in ms
-  }
+  name: "test-db",
+  backend: "memory",
 });
 ```
 
-### Database Methods
+Extension storage can also be selected directly:
 
-#### Basic Operations
-
-```javascript
-// Store data
-await db.set(table, key, value);
-
-// Retrieve data
-const value = await db.get(table, key);
-
-// Check existence
-const exists = await db.exists(table, key);
-
-// Delete data
-await db.delete(table, key);
-
-// Clear table
-await db.clear(table);
+```ts
+const db = await createDatabase({
+  name: "extension-db",
+  backend: "chrome-storage",
+  storageArea: "local",
+});
 ```
 
-#### Batch Operations
+## API
 
-```javascript
-// Batch multiple operations
+### `createDatabase(config)`
+
+Creates a database instance.
+
+```ts
+const db = await createDatabase({
+  name: "my-db",
+  backend: "indexeddb",
+  version: 1,
+});
+```
+
+`backend` is optional. `version` applies to IndexedDB schema upgrades.
+
+### Records
+
+Records are addressed by table and key.
+
+```ts
+await db.set("users", "ada", { name: "Ada Lovelace", active: true });
+
+const user = await db.get("users", "ada");
+const exists = await db.has("users", "ada");
+
+await db.delete("users", "ada");
+```
+
+Values must be JSON-compatible: strings, finite numbers, booleans, null, arrays, and plain objects containing those values.
+
+### Tables
+
+```ts
+const keys = await db.keys("users");
+const entries = await db.entries("users");
+const tables = await db.listTables();
+
+await db.clear("users");
+```
+
+### Queries
+
+`find` filters records in one table. Dot paths read nested object fields.
+
+```ts
+const activeAdmins = await db.find(
+  "users",
+  {
+    role: "admin",
+    "profile.active": true,
+    age: { $gte: 18 },
+  },
+  {
+    sort: { age: "asc" },
+    limit: 20,
+  },
+);
+```
+
+Supported operators: `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$in`, `$nin`, `$regex`, and `$exists`.
+
+### Batch Operations
+
+```ts
 await db.batch([
-  { type: 'set', table: 'users', key: 'user1', value: userData1 },
-  { type: 'set', table: 'users', key: 'user2', value: userData2 },
-  { type: 'delete', table: 'temp', key: 'old-data' }
+  { type: "set", table: "users", key: "ada", value: { name: "Ada" } },
+  { type: "delete", table: "cache", key: "stale-entry" },
+  { type: "clear", table: "sessions" },
 ]);
 ```
 
-#### Table Management
-
-```javascript
-// List all tables
-const tables = await db.listTables();
-
-// Create table (for SQLite provider)
-await db.createTable('users', schema);
-
-// Drop table
-await db.dropTable('users');
-```
-
-#### Transactions
-
-```javascript
-// Execute operations in a transaction
-await db.transaction('readwrite', async (tx) => {
-  const user = await tx.get('users', 'user1');
-  user.lastActive = Date.now();
-  await tx.set('users', 'user1', user);
-  await tx.set('activity', Date.now(), { userId: 'user1', action: 'login' });
-});
-```
-
-## Extension Manifest Setup
-
-### Chrome (Manifest V3)
-
-```json
-{
-  "manifest_version": 3,
-  "permissions": [
-    "storage",
-    "unlimitedStorage"
-  ],
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  }
-}
-```
-
-### Firefox (Manifest V2)
-
-```json
-{
-  "manifest_version": 2,
-  "permissions": [
-    "storage",
-    "unlimitedStorage"
-  ],
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": false
-  }
-}
-```
-
-## Usage in Extensions
-
-### Background Script
-
-```javascript
-import { createDatabase } from 'webextension-db';
-
-let db;
-
-// Initialize database
-async function initDB() {
-  db = await createDatabase({
-    name: 'extension-data',
-    provider: 'auto'
-  });
-}
-
-// Handle messages from popup/content scripts
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  handleMessage(message).then(sendResponse);
-  return true; // Async response
-});
-
-async function handleMessage(message) {
-  const { action, table, key, value } = message;
-  
-  switch (action) {
-    case 'get':
-      return await db.get(table, key);
-    case 'set':
-      await db.set(table, key, value);
-      return { success: true };
-    // ... other operations
-  }
-}
-```
-
-### Popup Script
-
-```javascript
-// Send message to background script
-async function getData(table, key) {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(
-      { action: 'get', table, key },
-      resolve
-    );
-  });
-}
-
-async function setData(table, key, value) {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(
-      { action: 'set', table, key, value },
-      resolve
-    );
-  });
-}
-
-// Usage
-const user = await getData('users', 'current');
-await setData('settings', 'theme', 'dark');
-```
-
-## Storage Backends
-
-### Automatic Selection
-
-By default, the package automatically selects the best storage backend:
-
-1. **Chrome**: Chrome Storage API (with unlimitedStorage) → IndexedDB
-2. **Firefox**: Browser Storage API → IndexedDB  
-3. **Safari**: IndexedDB (preferred for large storage) → Browser Storage API (10MB limit)
-
-### Manual Selection
-
-You can force a specific backend:
-
-```javascript
-const db = await createDatabase({
-  name: 'my-db',
-  provider: 'json',
-  backend: 'chrome-storage' // or 'browser-storage', 'indexeddb'
-});
-```
-
-## Error Handling
-
-```javascript
-try {
-  await db.set('users', 'user1', userData);
-} catch (error) {
-  if (error.code === 'STORAGE_QUOTA_ERROR') {
-    // Handle storage quota exceeded
-    console.log('Storage quota exceeded');
-  } else if (error.code === 'CONNECTION_ERROR') {
-    // Handle connection issues
-    console.log('Database connection failed');
-  }
-}
-```
+Batch operations run in order. They are not a transaction boundary.
 
 ## Development
 
+This repository uses pnpm.
+
 ```bash
-# Install dependencies
-npm install
-
-# Build the package
-npm run build
-
-# Build examples
-npm run build:examples
-
-# Build everything (package + examples)
-npm run build:all
-
-# Run tests
-npm test
-
-# Build and watch for changes
-npm run dev
+pnpm install
+pnpm verify
 ```
 
-## Examples
+Useful commands:
 
-Check out the [examples](./examples) directory for complete working examples:
+```bash
+pnpm lint
+pnpm type-check
+pnpm test
+pnpm build
+```
 
-- [Basic Usage](./examples/basic-usage.js)
-- [Chrome Extension](./examples/chrome-extension/)
-- [Firefox Extension](./examples/firefox-extension/)
-- [Safari Extension](./examples/safari-extension/)
-
-## Contributing
-
-Contributions are welcome!
-
-## License
-
-MIT ©
+The lint step runs Biome and a source policy check that rejects explicit `any`, type assertions, TypeScript suppression comments, and linter suppression comments in source, tests, and examples.
