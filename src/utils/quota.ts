@@ -1,1 +1,0 @@
-// TODO: navigator.storage helpers
