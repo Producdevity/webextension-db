@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>WebExtension DB browser IndexedDB test</title>
+  </head>
+  <body>
+    <pre id="result" data-status="pending">pending</pre>
+    <script type="module">
+      import { createDatabase } from "/dist/index.js";
+
+      const result = document.getElementById("result");
+
+      if (result === null) {
+        throw new Error("Missing result element");
+      }
+
+      const writeResult = (status, payload) => {
+        result.dataset.status = status;
+        result.textContent = JSON.stringify(payload);
+      };
+
+      try {
+        const engine = new URL(location.href).searchParams.get("engine");
+        const db = await createDatabase({
+          name: `browser-indexeddb-${crypto.randomUUID()}`,
+        });
+
+        await db.set("users", "ada", {
+          role: "admin",
+          profile: {
+            active: true,
+          },
+          age: 36,
+        });
+
+        const rows = await db.find(
+          "users",
+          {
+            role: "admin",
+            "profile.active": true,
+            age: { $gte: 18 },
+          },
+          {
+            sort: { age: "asc" },
+            limit: 20,
+          },
+        );
+
+        writeResult("ok", {
+          engine,
+          backend: db.backend,
+          rows,
+          tables: await db.listTables(),
+        });
+
+        await db.destroy();
+      } catch (error) {
+        writeResult("error", {
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    </script>
+  </body>
+</html>

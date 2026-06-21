@@ -27,6 +27,12 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": false
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "examples/**/*.ts", "vitest.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "examples/**/*.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ],
   "exclude": ["dist", "docs", "coverage", "node_modules"]
 }

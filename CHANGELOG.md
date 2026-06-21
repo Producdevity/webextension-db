@@ -11,6 +11,7 @@ All notable changes to this project are recorded here.
 - Changed the CommonJS package entry to `dist/index.cjs`.
 - Removed generated documentation, packaged tarballs, placeholder WASM files, and broken browser-extension examples from source control.
 - Verified dependency and tool configuration against current upstream migration commands.
+- Hardened browser storage behavior against documented IndexedDB transaction semantics and WebExtension storage completion styles.
 
 ### Added
 
@@ -18,8 +19,10 @@ All notable changes to this project are recorded here.
 - Runtime validation for JSON-compatible values.
 - Query filters with nested paths, comparison operators, regex matching, sorting, and pagination.
 - Unit and integration tests for value validation, memory storage, IndexedDB persistence, and extension storage behavior.
+- Browser-engine tests for the built IndexedDB path in Chromium, Firefox, and WebKit.
 - A source policy check for unsafe TypeScript escape hatches.
 - A manual debug build workflow that verifies the package, creates a tarball, and uploads it as a workflow artifact.
+- Compatibility coverage for callback-based extension storage APIs and `runtime.lastError` failures.
 
 ## [0.1.1] - 2026-06-21
 

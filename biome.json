@@ -54,9 +54,12 @@
   },
   "overrides": [
     {
-      "includes": ["scripts/**"],
+      "includes": ["scripts/**", "playwright.config.ts"],
       "linter": {
         "rules": {
+          "complexity": {
+            "useLiteralKeys": "off"
+          },
           "correctness": {
             "noNodejsModules": "off"
           }

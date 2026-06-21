@@ -151,7 +151,14 @@ Useful commands:
 pnpm lint
 pnpm type-check
 pnpm test
+pnpm test:browsers
 pnpm build
+```
+
+Before running browser-engine tests locally, install the Playwright browser binaries:
+
+```bash
+pnpm test:browsers:install
 ```
 
 The lint step runs Biome and a source policy check that rejects explicit `any`, type assertions, TypeScript suppression comments, and linter suppression comments in source, tests, and examples.

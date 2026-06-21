@@ -5,6 +5,8 @@ node_modules
 dist
 docs
 coverage
+playwright-report
+test-results
 *.tgz
 
 # package manager and runtime logs
