@@ -1,7 +1,10 @@
 import {
   type ExtensionStorageArea,
   type ExtensionStorageKeys,
+  type ExtensionStorageResult,
   getExtensionStorageArea,
+  getReadonlyExtensionStorageArea,
+  type ReadonlyExtensionStorageArea,
 } from "./environment";
 import { ConfigurationError, StorageError } from "./errors";
 import { assertJsonValue, cloneJsonValue } from "./json";
@@ -9,23 +12,31 @@ import { formatStorageKey, parseStorageKey, validateName } from "./keys";
 import type {
   DatabaseEntry,
   ExtensionStorageAreaName,
+  ExtensionStorageBackendType,
   JsonValue,
+  StorageAccess,
   StorageBackendType,
 } from "./types";
 
 const DEFAULT_STORE_NAME = "records";
 
-export interface StorageBackend {
+export interface ReadonlyStorageBackend {
   readonly type: StorageBackendType;
+  readonly access: StorageAccess;
 
   get(table: string, key: string): Promise<JsonValue | undefined>;
-  set(table: string, key: string, value: JsonValue): Promise<void>;
-  delete(table: string, key: string): Promise<void>;
-  clearTable(table: string): Promise<void>;
   keys(table: string): Promise<string[]>;
   entries(table: string): Promise<DatabaseEntry[]>;
   listTables(): Promise<string[]>;
   close(): Promise<void>;
+}
+
+export interface StorageBackend extends ReadonlyStorageBackend {
+  readonly access: "readwrite";
+
+  set(table: string, key: string, value: JsonValue): Promise<void>;
+  delete(table: string, key: string): Promise<void>;
+  clearTable(table: string): Promise<void>;
   destroy(): Promise<void>;
 }
 
@@ -152,6 +163,7 @@ function readRuntimeLastError(apiName: "chrome" | "browser"): string | undefined
 
 export class IndexedDbStorageBackend implements StorageBackend {
   readonly type = "indexeddb";
+  readonly access = "readwrite";
 
   private constructor(
     private readonly namespace: string,
@@ -287,161 +299,73 @@ export class IndexedDbStorageBackend implements StorageBackend {
   }
 }
 
-export class ExtensionStorageBackend implements StorageBackend {
-  readonly type: StorageBackendType;
+function extensionApiName(type: ExtensionStorageBackendType): "chrome" | "browser" {
+  return type === "chrome-storage" ? "chrome" : "browser";
+}
 
+function extensionStorageType(apiName: "chrome" | "browser"): ExtensionStorageBackendType {
+  return apiName === "chrome" ? "chrome-storage" : "browser-storage";
+}
+
+class ExtensionStorageClient {
   constructor(
     private readonly apiName: "chrome" | "browser",
-    private readonly namespace: string,
-    private readonly area: ExtensionStorageArea,
-  ) {
-    this.type = apiName === "chrome" ? "chrome-storage" : "browser-storage";
-    validateName("Database name", namespace);
+    private readonly area: ReadonlyExtensionStorageArea,
+  ) {}
+
+  getItems(keys: ExtensionStorageKeys): Promise<Record<string, unknown>> {
+    return this.runStorageRead((complete) => this.area.get(keys, complete), "storage.get failed");
   }
 
-  static create(
-    type: "chrome-storage" | "browser-storage",
-    namespace: string,
-    areaName: ExtensionStorageAreaName,
-  ): ExtensionStorageBackend {
-    const apiName = type === "chrome-storage" ? "chrome" : "browser";
-    const area = getExtensionStorageArea(apiName, areaName);
+  async getStorageKeys(): Promise<string[]> {
+    const getKeys = this.area.getKeys;
 
-    if (area === undefined) {
-      throw new ConfigurationError(`${type} is not available`);
+    if (getKeys !== undefined) {
+      return this.runStorageRead(
+        (complete) => getKeys.call(this.area, complete),
+        "storage.getKeys failed",
+      );
     }
 
-    return new ExtensionStorageBackend(apiName, namespace, area);
-  }
-
-  async get(table: string, key: string): Promise<JsonValue | undefined> {
-    const fullKey = formatStorageKey(this.namespace, table, key);
-    const result = await this.getItems(fullKey);
-    const value = result[fullKey];
-
-    if (value === undefined) {
-      return;
-    }
-
-    assertJsonValue(value);
-    return cloneJsonValue(value);
-  }
-
-  async set(table: string, key: string, value: JsonValue): Promise<void> {
-    const fullKey = formatStorageKey(this.namespace, table, key);
-    await this.setItems({ [fullKey]: cloneJsonValue(value) });
-  }
-
-  async delete(table: string, key: string): Promise<void> {
-    const fullKey = formatStorageKey(this.namespace, table, key);
-    await this.removeItems(fullKey);
-  }
-
-  async clearTable(table: string): Promise<void> {
-    validateName("Table name", table);
-    const keys = await this.keys(table);
-    const fullKeys = keys.map((key) => formatStorageKey(this.namespace, table, key));
-
-    if (fullKeys.length > 0) {
-      await this.removeItems(fullKeys);
-    }
-  }
-
-  async keys(table: string): Promise<string[]> {
-    validateName("Table name", table);
     const items = await this.getItems(null);
-    const keys: string[] = [];
-
-    for (const storageKey of Object.keys(items)) {
-      const parsed = parseStorageKey(this.namespace, storageKey);
-      if (parsed?.table === table) {
-        keys.push(parsed.key);
-      }
-    }
-
-    return keys;
+    return Object.keys(items);
   }
 
-  async entries(table: string): Promise<DatabaseEntry[]> {
-    validateName("Table name", table);
-    const items = await this.getItems(null);
-    const entries: DatabaseEntry[] = [];
-
-    for (const [storageKey, value] of Object.entries(items)) {
-      const parsed = parseStorageKey(this.namespace, storageKey);
-      if (parsed?.table !== table) {
-        continue;
-      }
-
-      assertJsonValue(value);
-      entries.push({ key: parsed.key, value: cloneJsonValue(value) });
-    }
-
-    return entries;
+  setItems(area: ExtensionStorageArea, items: Record<string, unknown>): Promise<void> {
+    return this.runStorageChange((complete) => area.set(items, complete), "storage.set failed");
   }
 
-  async listTables(): Promise<string[]> {
-    const items = await this.getItems(null);
-    const tables = new Set<string>();
-
-    for (const storageKey of Object.keys(items)) {
-      const parsed = parseStorageKey(this.namespace, storageKey);
-      if (parsed !== undefined) {
-        tables.add(parsed.table);
-      }
-    }
-
-    return [...tables].sort();
-  }
-
-  async close(): Promise<void> {}
-
-  async destroy(): Promise<void> {
-    const items = await this.getItems(null);
-    const keys = Object.keys(items).filter(
-      (key) => parseStorageKey(this.namespace, key) !== undefined,
+  removeItems(area: ExtensionStorageArea, keys: string | string[]): Promise<void> {
+    return this.runStorageChange(
+      (complete) => area.remove(keys, complete),
+      "storage.remove failed",
     );
-
-    if (keys.length > 0) {
-      await this.removeItems(keys);
-    }
   }
 
-  private getItems(keys: ExtensionStorageKeys): Promise<Record<string, unknown>> {
+  private runStorageRead<T>(
+    invoke: (complete: (value: T) => unknown) => ExtensionStorageResult<T>,
+    fallback: string,
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
-      const complete = (items: Record<string, unknown>) => {
-        const error = this.lastError("storage.get failed");
+      const complete = (value: T) => {
+        const error = this.lastError(fallback);
         if (error !== undefined) {
           reject(error);
           return;
         }
 
-        resolve(items);
+        resolve(value);
       };
 
       try {
-        const result = this.area.get(keys, complete);
+        const result = invoke(complete);
         if (result !== undefined) {
-          result.then(resolve, (error) => reject(storageErrorFrom(error, "storage.get failed")));
+          result.then(resolve, (error) => reject(storageErrorFrom(error, fallback)));
         }
       } catch (error) {
-        reject(storageErrorFrom(error, "storage.get failed"));
+        reject(storageErrorFrom(error, fallback));
       }
     });
-  }
-
-  private setItems(items: Record<string, unknown>): Promise<void> {
-    return this.runStorageChange(
-      (complete) => this.area.set(items, complete),
-      "storage.set failed",
-    );
-  }
-
-  private removeItems(keys: string | string[]): Promise<void> {
-    return this.runStorageChange(
-      (complete) => this.area.remove(keys, complete),
-      "storage.remove failed",
-    );
   }
 
   private runStorageChange(
@@ -482,8 +406,178 @@ export class ExtensionStorageBackend implements StorageBackend {
   }
 }
 
+abstract class ExtensionStorageReader implements ReadonlyStorageBackend {
+  readonly type: ExtensionStorageBackendType;
+  abstract readonly access: StorageAccess;
+
+  protected constructor(
+    apiName: "chrome" | "browser",
+    protected readonly namespace: string,
+    protected readonly client: ExtensionStorageClient,
+  ) {
+    this.type = extensionStorageType(apiName);
+    validateName("Database name", namespace);
+  }
+
+  async get(table: string, key: string): Promise<JsonValue | undefined> {
+    const fullKey = formatStorageKey(this.namespace, table, key);
+    const result = await this.client.getItems(fullKey);
+    const value = result[fullKey];
+
+    if (value === undefined) {
+      return;
+    }
+
+    assertJsonValue(value);
+    return cloneJsonValue(value);
+  }
+
+  async keys(table: string): Promise<string[]> {
+    validateName("Table name", table);
+    const storageKeys = await this.client.getStorageKeys();
+    const keys: string[] = [];
+
+    for (const storageKey of storageKeys) {
+      const parsed = parseStorageKey(this.namespace, storageKey);
+      if (parsed?.table === table) {
+        keys.push(parsed.key);
+      }
+    }
+
+    return keys;
+  }
+
+  async entries(table: string): Promise<DatabaseEntry[]> {
+    validateName("Table name", table);
+    const items = await this.client.getItems(null);
+    const entries: DatabaseEntry[] = [];
+
+    for (const [storageKey, value] of Object.entries(items)) {
+      const parsed = parseStorageKey(this.namespace, storageKey);
+      if (parsed?.table !== table) {
+        continue;
+      }
+
+      assertJsonValue(value);
+      entries.push({ key: parsed.key, value: cloneJsonValue(value) });
+    }
+
+    return entries;
+  }
+
+  async listTables(): Promise<string[]> {
+    const storageKeys = await this.client.getStorageKeys();
+    const tables = new Set<string>();
+
+    for (const storageKey of storageKeys) {
+      const parsed = parseStorageKey(this.namespace, storageKey);
+      if (parsed !== undefined) {
+        tables.add(parsed.table);
+      }
+    }
+
+    return [...tables].sort();
+  }
+
+  async close(): Promise<void> {}
+}
+
+export class ReadonlyExtensionStorageBackend extends ExtensionStorageReader {
+  readonly access = "readonly";
+
+  private constructor(
+    apiName: "chrome" | "browser",
+    namespace: string,
+    client: ExtensionStorageClient,
+  ) {
+    super(apiName, namespace, client);
+  }
+
+  static create(
+    type: ExtensionStorageBackendType,
+    namespace: string,
+    areaName: ExtensionStorageAreaName,
+  ): ReadonlyExtensionStorageBackend {
+    const apiName = extensionApiName(type);
+    const area = getReadonlyExtensionStorageArea(apiName, areaName);
+
+    if (area === undefined) {
+      throw new ConfigurationError(`${type} ${areaName} storage is not available`);
+    }
+
+    return new ReadonlyExtensionStorageBackend(
+      apiName,
+      namespace,
+      new ExtensionStorageClient(apiName, area),
+    );
+  }
+}
+
+export class ExtensionStorageBackend extends ExtensionStorageReader implements StorageBackend {
+  readonly access = "readwrite";
+
+  private constructor(
+    apiName: "chrome" | "browser",
+    namespace: string,
+    client: ExtensionStorageClient,
+    private readonly area: ExtensionStorageArea,
+  ) {
+    super(apiName, namespace, client);
+  }
+
+  static create(
+    type: ExtensionStorageBackendType,
+    namespace: string,
+    areaName: ExtensionStorageAreaName,
+  ): ExtensionStorageBackend {
+    const apiName = extensionApiName(type);
+    const area = getExtensionStorageArea(apiName, areaName);
+
+    if (area === undefined) {
+      throw new ConfigurationError(`${type} ${areaName} storage is not available`);
+    }
+
+    return new ExtensionStorageBackend(
+      apiName,
+      namespace,
+      new ExtensionStorageClient(apiName, area),
+      area,
+    );
+  }
+
+  async set(table: string, key: string, value: JsonValue): Promise<void> {
+    const fullKey = formatStorageKey(this.namespace, table, key);
+    await this.client.setItems(this.area, { [fullKey]: cloneJsonValue(value) });
+  }
+
+  async delete(table: string, key: string): Promise<void> {
+    const fullKey = formatStorageKey(this.namespace, table, key);
+    await this.client.removeItems(this.area, fullKey);
+  }
+
+  async clearTable(table: string): Promise<void> {
+    validateName("Table name", table);
+    const keys = await this.keys(table);
+    const fullKeys = keys.map((key) => formatStorageKey(this.namespace, table, key));
+
+    if (fullKeys.length > 0) {
+      await this.client.removeItems(this.area, fullKeys);
+    }
+  }
+
+  async destroy(): Promise<void> {
+    const storageKeys = await this.client.getStorageKeys();
+    const keys = storageKeys.filter((key) => parseStorageKey(this.namespace, key) !== undefined);
+
+    if (keys.length > 0) {
+      await this.client.removeItems(this.area, keys);
+    }
+  }
+}
+
 export class MemoryStorageBackend implements StorageBackend {
   readonly type = "memory";
+  readonly access = "readwrite";
 
   private readonly records = new Map<string, JsonValue>();
 

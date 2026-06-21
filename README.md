@@ -62,6 +62,21 @@ const db = await createDatabase({
 });
 ```
 
+When `storageArea` is set and `backend` is omitted, `createDatabase` selects an available extension storage backend for that area instead of falling back to IndexedDB.
+Supported extension storage areas are `local`, `sync`, `session`, and `managed`.
+`session` is read/write but memory-backed by the browser and is cleared when the extension is unloaded.
+`managed` is read-only policy storage, so `createDatabase` returns a read-only database for that area:
+
+```ts
+const policyDb = await createDatabase({
+  name: "policy-db",
+  backend: "browser-storage",
+  storageArea: "managed",
+});
+
+const policy = await policyDb.get("policies", "homepage");
+```
+
 ## API
 
 ### `createDatabase(config)`

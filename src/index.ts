@@ -3,11 +3,15 @@ export type {
   ExtensionStorageArea,
   ExtensionStorageKeys,
   ExtensionStorageResult,
+  ReadonlyExtensionStorageArea,
 } from "./environment";
 export {
   detectStorageCapabilities,
+  getBestExtensionStorageBackend,
   getBestStorageBackend,
   getExtensionStorageArea,
+  getExtensionStorageAreaAccess,
+  getReadonlyExtensionStorageArea,
 } from "./environment";
 export {
   ConfigurationError,
@@ -27,7 +31,9 @@ export type {
   DatabaseConfig,
   DatabaseEntry,
   DatabaseProvider,
+  DatabaseReader,
   ExtensionStorageAreaName,
+  ExtensionStorageBackendType,
   JsonArray,
   JsonObject,
   JsonPrimitive,
@@ -35,7 +41,14 @@ export type {
   QueryFilter,
   QueryOperator,
   QueryOptions,
+  ReadOnlyExtensionStorageAreaName,
+  ReadonlyDatabase,
+  ReadonlyDatabaseConfig,
+  ReadWriteDatabaseConfig,
+  ReadWriteExtensionStorageAreaName,
   SortDirection,
+  StorageAccess,
+  StorageAreaCapabilities,
   StorageBackendType,
   StorageCapabilities,
 } from "./types";

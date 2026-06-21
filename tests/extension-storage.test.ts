@@ -1,6 +1,12 @@
+import { indexedDB } from "fake-indexeddb";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ExtensionStorageArea, ExtensionStorageKeys } from "../src/environment";
+import type {
+  ExtensionStorageArea,
+  ExtensionStorageKeys,
+  ReadonlyExtensionStorageArea,
+} from "../src/environment";
 import { createDatabase, detectStorageCapabilities, StorageError } from "../src/index";
+import { formatStorageKey } from "../src/keys";
 
 class InMemoryExtensionStorageArea implements ExtensionStorageArea {
   private readonly records = new Map<string, unknown>();
@@ -159,6 +165,66 @@ class CallbackExtensionStorageArea implements ExtensionStorageArea {
   }
 }
 
+class KeyListingExtensionStorageArea extends InMemoryExtensionStorageArea {
+  getCalls = 0;
+  getKeysCalls = 0;
+
+  override async get(keys?: ExtensionStorageKeys): Promise<Record<string, unknown>> {
+    this.getCalls += 1;
+    return super.get(keys);
+  }
+
+  async getKeys(): Promise<string[]> {
+    this.getKeysCalls += 1;
+    return Object.keys(await super.get(null));
+  }
+}
+
+class ManagedExtensionStorageArea implements ReadonlyExtensionStorageArea {
+  constructor(private readonly records: Record<string, unknown>) {}
+
+  async get(keys?: ExtensionStorageKeys): Promise<Record<string, unknown>> {
+    if (keys === undefined || keys === null) {
+      return { ...this.records };
+    }
+
+    if (typeof keys === "string") {
+      return this.pickRecords([keys]);
+    }
+
+    if (Array.isArray(keys)) {
+      return this.pickRecords(keys);
+    }
+
+    const records = this.pickRecords(Object.keys(keys));
+
+    for (const [key, fallback] of Object.entries(keys)) {
+      if (records[key] === undefined) {
+        records[key] = fallback;
+      }
+    }
+
+    return records;
+  }
+
+  async getKeys(): Promise<string[]> {
+    return Object.keys(this.records);
+  }
+
+  private pickRecords(keys: string[]): Record<string, unknown> {
+    const output: Record<string, unknown> = {};
+
+    for (const key of keys) {
+      const value = this.records[key];
+      if (value !== undefined) {
+        output[key] = value;
+      }
+    }
+
+    return output;
+  }
+}
+
 interface RuntimeStub {
   lastError: { message: string } | undefined;
 }
@@ -238,6 +304,112 @@ describe("promise extension storage backend", () => {
   });
 });
 
+describe("session extension storage backend", () => {
+  it("selects session storage when the area is explicit", async () => {
+    const session = new InMemoryExtensionStorageArea();
+    vi.stubGlobal("indexedDB", indexedDB);
+    vi.stubGlobal("chrome", {
+      storage: {
+        session,
+      },
+    });
+
+    const db = await createDatabase({
+      name: "chrome-session-storage-test",
+      storageArea: "session",
+    });
+
+    await db.set("users", "ada", { name: "Ada" });
+
+    expect(db.access).toBe("readwrite");
+    expect(db.backend).toBe("chrome-storage");
+    expect(await db.get("users", "ada")).toEqual({ name: "Ada" });
+    expect(await db.listTables()).toEqual(["users"]);
+
+    await db.destroy();
+    expect(await session.get(null)).toEqual({});
+  });
+});
+
+describe("extension storage key enumeration", () => {
+  it("uses StorageArea.getKeys when the browser provides it", async () => {
+    const local = new KeyListingExtensionStorageArea();
+    await local.set({
+      [formatStorageKey("chrome-getkeys-test", "users", "ada")]: { name: "Ada" },
+      [formatStorageKey("chrome-getkeys-test", "settings", "theme")]: "dark",
+    });
+
+    vi.stubGlobal("chrome", {
+      storage: {
+        local,
+      },
+    });
+
+    const db = await createDatabase({
+      name: "chrome-getkeys-test",
+      backend: "chrome-storage",
+    });
+
+    expect(await db.keys("users")).toEqual(["ada"]);
+    expect(await db.listTables()).toEqual(["settings", "users"]);
+    expect(local.getKeysCalls).toBe(2);
+    expect(local.getCalls).toBe(0);
+  });
+});
+
+describe("managed extension storage backend", () => {
+  it("reads chrome.storage.managed through a readonly database", async () => {
+    const managed = new ManagedExtensionStorageArea({
+      [formatStorageKey("managed-policy-test", "policies", "feature")]: {
+        enabled: true,
+      },
+    });
+
+    vi.stubGlobal("chrome", {
+      storage: {
+        managed,
+      },
+    });
+
+    const db = await createDatabase({
+      name: "managed-policy-test",
+      backend: "chrome-storage",
+      storageArea: "managed",
+    });
+
+    expect(db.access).toBe("readonly");
+    expect(db.backend).toBe("chrome-storage");
+    expect("set" in db).toBe(false);
+    expect("destroy" in db).toBe(false);
+    expect(await db.get("policies", "feature")).toEqual({ enabled: true });
+    expect(await db.keys("policies")).toEqual(["feature"]);
+    expect(await db.listTables()).toEqual(["policies"]);
+  });
+
+  it("selects browser.storage.managed automatically for managed storage", async () => {
+    const managed = new ManagedExtensionStorageArea({
+      [formatStorageKey("browser-managed-policy-test", "policies", "homepage")]: {
+        locked: true,
+      },
+    });
+
+    vi.stubGlobal("browser", {
+      storage: {
+        managed,
+      },
+    });
+
+    const db = await createDatabase({
+      name: "browser-managed-policy-test",
+      storageArea: "managed",
+    });
+
+    expect(db.access).toBe("readonly");
+    expect(db.backend).toBe("browser-storage");
+    expect(await db.get("policies", "homepage")).toEqual({ locked: true });
+  });
+});
+
 describe("callback extension storage backend", () => {
   it("uses callback-based chrome.storage areas", async () => {
     const local = new CallbackExtensionStorageArea();
@@ -285,10 +457,19 @@ describe("extension storage detection", () => {
     vi.stubGlobal("browser", {
       storage: {
         local: new InMemoryExtensionStorageArea(),
+        managed: new ManagedExtensionStorageArea({}),
       },
     });
 
-    expect(detectStorageCapabilities()).toMatchObject({
+    const capabilities = detectStorageCapabilities();
+
+    expect(capabilities).toMatchObject({
+      browserStorage: true,
+    });
+    expect(capabilities.storageAreas).toContainEqual({
+      area: "managed",
+      access: "readonly",
+      chromeStorage: false,
       browserStorage: true,
     });
   });

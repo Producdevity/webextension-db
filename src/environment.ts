@@ -1,21 +1,38 @@
 import { ConfigurationError } from "./errors";
-import type { ExtensionStorageAreaName, StorageBackendType, StorageCapabilities } from "./types";
+import type {
+  ExtensionStorageAreaName,
+  ExtensionStorageBackendType,
+  StorageAccess,
+  StorageBackendType,
+  StorageCapabilities,
+} from "./types";
 
 export type ExtensionStorageKeys = string | string[] | Record<string, unknown> | null;
 export type ExtensionStorageResult<T> = Promise<T> | undefined;
 
-export interface ExtensionStorageArea {
+const EXTENSION_STORAGE_AREA_NAMES: ExtensionStorageAreaName[] = [
+  "local",
+  "sync",
+  "session",
+  "managed",
+];
+
+export interface ReadonlyExtensionStorageArea {
   get(
     keys?: ExtensionStorageKeys,
     callback?: (items: Record<string, unknown>) => unknown,
   ): ExtensionStorageResult<Record<string, unknown>>;
-  set(items: Record<string, unknown>, callback?: () => unknown): ExtensionStorageResult<void>;
-  remove(keys: string | string[], callback?: () => unknown): ExtensionStorageResult<void>;
-  clear(callback?: () => unknown): ExtensionStorageResult<void>;
+  getKeys?(callback?: (keys: string[]) => unknown): ExtensionStorageResult<string[]>;
   getBytesInUse?(
     keys?: string | string[] | null,
     callback?: (bytesInUse: number) => unknown,
   ): ExtensionStorageResult<number>;
+}
+
+export interface ExtensionStorageArea extends ReadonlyExtensionStorageArea {
+  set(items: Record<string, unknown>, callback?: () => unknown): ExtensionStorageResult<void>;
+  remove(keys: string | string[], callback?: () => unknown): ExtensionStorageResult<void>;
+  clear(callback?: () => unknown): ExtensionStorageResult<void>;
 }
 
 function isRecord(value: unknown): value is Record<PropertyKey, unknown> {
@@ -30,19 +47,47 @@ function getProperty(source: unknown, property: PropertyKey): unknown {
   return Reflect.get(source, property);
 }
 
+function isReadonlyExtensionStorageArea(value: unknown): value is ReadonlyExtensionStorageArea {
+  return typeof getProperty(value, "get") === "function";
+}
+
 function isExtensionStorageArea(value: unknown): value is ExtensionStorageArea {
   return (
-    typeof getProperty(value, "get") === "function" &&
+    isReadonlyExtensionStorageArea(value) &&
     typeof getProperty(value, "set") === "function" &&
     typeof getProperty(value, "remove") === "function" &&
     typeof getProperty(value, "clear") === "function"
   );
 }
 
+export function getExtensionStorageAreaAccess(areaName: ExtensionStorageAreaName): StorageAccess {
+  return areaName === "managed" ? "readonly" : "readwrite";
+}
+
+export function getReadonlyExtensionStorageArea(
+  apiName: "chrome" | "browser",
+  areaName: ExtensionStorageAreaName,
+): ReadonlyExtensionStorageArea | undefined {
+  const api = getProperty(globalThis, apiName);
+  const storage = getProperty(api, "storage");
+  const area = getProperty(storage, areaName);
+  let storageArea: ReadonlyExtensionStorageArea | undefined;
+
+  if (isReadonlyExtensionStorageArea(area)) {
+    storageArea = area;
+  }
+
+  return storageArea;
+}
+
 export function getExtensionStorageArea(
   apiName: "chrome" | "browser",
   areaName: ExtensionStorageAreaName,
 ): ExtensionStorageArea | undefined {
+  if (getExtensionStorageAreaAccess(areaName) === "readonly") {
+    return;
+  }
+
   const api = getProperty(globalThis, apiName);
   const storage = getProperty(api, "storage");
   const area = getProperty(storage, areaName);
@@ -60,10 +105,23 @@ export function detectStorageCapabilities(
 ): StorageCapabilities {
   const availableBackends: StorageBackendType[] = [];
   const indexedDb = typeof indexedDB !== "undefined";
-  const chromeStorage = getExtensionStorageArea("chrome", areaName) !== undefined;
-  const browserStorage = getExtensionStorageArea("browser", areaName) !== undefined;
+  const storageAccess = getExtensionStorageAreaAccess(areaName);
+  const chromeStorage =
+    storageAccess === "readonly"
+      ? getReadonlyExtensionStorageArea("chrome", areaName) !== undefined
+      : getExtensionStorageArea("chrome", areaName) !== undefined;
+  const browserStorage =
+    storageAccess === "readonly"
+      ? getReadonlyExtensionStorageArea("browser", areaName) !== undefined
+      : getExtensionStorageArea("browser", areaName) !== undefined;
+  const storageAreas = EXTENSION_STORAGE_AREA_NAMES.map((area) => ({
+    area,
+    access: getExtensionStorageAreaAccess(area),
+    chromeStorage: getReadonlyExtensionStorageArea("chrome", area) !== undefined,
+    browserStorage: getReadonlyExtensionStorageArea("browser", area) !== undefined,
+  }));
 
-  if (indexedDb) {
+  if (indexedDb && storageAccess === "readwrite") {
     availableBackends.push("indexeddb");
   }
 
@@ -80,6 +138,7 @@ export function detectStorageCapabilities(
     chromeStorage,
     browserStorage,
     availableBackends,
+    storageAreas,
   };
 }
 
@@ -88,9 +147,17 @@ export function getBestStorageBackend(
 ): StorageBackendType {
   const capabilities = detectStorageCapabilities(areaName);
 
-  if (capabilities.indexedDb) {
+  if (capabilities.indexedDb && getExtensionStorageAreaAccess(areaName) === "readwrite") {
     return "indexeddb";
   }
+
+  return getBestExtensionStorageBackend(areaName);
+}
+
+export function getBestExtensionStorageBackend(
+  areaName: ExtensionStorageAreaName,
+): ExtensionStorageBackendType {
+  const capabilities = detectStorageCapabilities(areaName);
 
   if (capabilities.chromeStorage) {
     return "chrome-storage";
@@ -101,6 +168,6 @@ export function getBestStorageBackend(
   }
 
   throw new ConfigurationError(
-    'No persistent storage backend is available. Pass backend: "memory" for tests or temporary data.',
+    'No compatible storage backend is available. Pass backend: "memory" for tests or temporary data.',
   );
 }

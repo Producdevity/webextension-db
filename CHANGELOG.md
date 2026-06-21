@@ -12,6 +12,8 @@ All notable changes to this project are recorded here.
 - Removed generated documentation, packaged tarballs, placeholder WASM files, and broken browser-extension examples from source control.
 - Verified dependency and tool configuration against current upstream migration commands.
 - Hardened browser storage behavior against documented IndexedDB transaction semantics and WebExtension storage completion styles.
+- Modeled read-only storage separately from writable database backends.
+- Changed explicit `storageArea` configurations to select extension storage instead of silently using IndexedDB.
 
 ### Added
 
@@ -23,6 +25,7 @@ All notable changes to this project are recorded here.
 - A source policy check for unsafe TypeScript escape hatches.
 - A manual debug build workflow that verifies the package, creates a tarball, and uploads it as a workflow artifact.
 - Compatibility coverage for callback-based extension storage APIs and `runtime.lastError` failures.
+- Support for `storage.session`, read-only `storage.managed`, and `StorageArea.getKeys()` when available.
 
 ## [0.1.1] - 2026-06-21
 
