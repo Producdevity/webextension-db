@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebExtension DB</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>WebExtension DB</h1>
+          <p id="runtimeLabel">extension runtime</p>
+        </div>
+        <output id="status" class="status">Ready</output>
+      </header>
+
+      <section class="panel">
+        <div class="grid two">
+          <label>
+            <span>Database</span>
+            <input id="databaseName" autocomplete="off" value="popup-demo" />
+          </label>
+          <label>
+            <span>Backend</span>
+            <select id="backend">
+              <option value="auto">Auto</option>
+              <option value="indexeddb">IndexedDB</option>
+              <option value="chrome-storage">chrome.storage</option>
+              <option value="browser-storage">browser.storage</option>
+              <option value="memory">Memory</option>
+            </select>
+          </label>
+          <label>
+            <span>Area</span>
+            <select id="storageArea">
+              <option value="default">Default</option>
+              <option value="local">local</option>
+              <option value="sync">sync</option>
+              <option value="session">session</option>
+              <option value="managed">managed</option>
+            </select>
+          </label>
+          <div class="metric">
+            <span>Active</span>
+            <strong id="activeBackend">unknown</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="grid two">
+          <label>
+            <span>Table</span>
+            <input id="tableName" autocomplete="off" value="settings" />
+          </label>
+          <label>
+            <span>Key</span>
+            <input id="recordKey" autocomplete="off" value="theme" />
+          </label>
+        </div>
+        <label class="wide">
+          <span>JSON value</span>
+          <textarea id="recordValue" spellcheck="false">{"mode":"dark","sync":true}</textarea>
+        </label>
+        <div class="actions">
+          <button id="writeRecord" type="button">Write</button>
+          <button id="readRecord" type="button">Read</button>
+          <button id="deleteRecord" type="button">Delete</button>
+          <button id="listRecords" type="button">List</button>
+          <button id="clearTable" type="button">Clear</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <label class="wide">
+          <span>Find filter</span>
+          <textarea id="queryFilter" spellcheck="false">{}</textarea>
+        </label>
+        <div class="actions">
+          <button id="findRecords" type="button">Find</button>
+          <button id="countRecords" type="button">Count</button>
+          <button id="listTables" type="button">Tables</button>
+          <button id="destroyDatabase" type="button">Destroy</button>
+        </div>
+      </section>
+
+      <section class="result-panel">
+        <div class="result-heading">
+          <span>Result</span>
+          <button id="resetOutput" type="button">Reset</button>
+        </div>
+        <pre id="result">No operation has run.</pre>
+      </section>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

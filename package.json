@@ -18,18 +18,20 @@
   "files": [
     "dist",
     "examples",
+    "!examples/extensions/dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "rollup -c",
-    "clean": "rimraf dist docs coverage",
+    "build:extensions": "node scripts/build-extension-examples.mjs",
+    "clean": "rimraf dist docs coverage examples/extensions/dist",
     "docs:build": "typedoc",
     "format": "biome format --write .",
     "lint": "biome ci . && node scripts/check-source-policy.mjs",
     "lint:fix": "biome check --write .",
     "test": "vitest run",
-    "pretest:browsers": "pnpm build",
+    "pretest:browsers": "pnpm build && pnpm build:extensions",
     "test:browsers": "playwright test",
     "test:browsers:install": "playwright install --with-deps chromium firefox webkit",
     "test:watch": "vitest",

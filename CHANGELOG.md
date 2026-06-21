@@ -27,6 +27,7 @@ All notable changes to this project are recorded here.
 - Compatibility coverage for callback-based extension storage APIs and `runtime.lastError` failures.
 - Support for `storage.session`, read-only `storage.managed`, and `StorageArea.getKeys()` when available.
 - Chrome, Firefox, and Safari browser-extension examples.
+- Buildable browser-extension test folders with a popup for read/write/query operations.
 
 ## [0.1.1] - 2026-06-21
 

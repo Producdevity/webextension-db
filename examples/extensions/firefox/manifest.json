@@ -9,6 +9,7 @@
     "type": "module"
   },
   "action": {
+    "default_popup": "popup.html",
     "default_title": "WebExtension DB"
   },
   "browser_specific_settings": {

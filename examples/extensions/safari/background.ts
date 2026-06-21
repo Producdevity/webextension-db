@@ -1,17 +1,25 @@
 import { createDatabase } from "webextension-db";
 
-const db = await createDatabase({
-  name: "safari-extension-example",
-});
+function logError(error: unknown): void {
+  console.error(error instanceof Error ? error.message : String(error));
+}
 
-await db.set("preferences", "reader", {
-  fontSize: 18,
-  enabled: true,
-  updatedAt: new Date().toISOString(),
-});
+async function seedExampleData(): Promise<void> {
+  const db = await createDatabase({
+    name: "safari-extension-example",
+  });
 
-const readerEnabled = await db.has("preferences", "reader");
-const tables = await db.listTables();
+  await db.set("preferences", "reader", {
+    fontSize: 18,
+    enabled: true,
+    updatedAt: new Date().toISOString(),
+  });
 
-console.info(`Safari reader preferences stored: ${String(readerEnabled)}`);
-console.info(`Safari extension tables: ${tables.join(", ")}`);
+  const readerEnabled = await db.has("preferences", "reader");
+  const tables = await db.listTables();
+
+  console.info(`Safari reader preferences stored: ${String(readerEnabled)}`);
+  console.info(`Safari extension tables: ${tables.join(", ")}`);
+}
+
+seedExampleData().catch(logError);

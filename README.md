@@ -78,6 +78,7 @@ const policy = await policyDb.get("policies", "homepage");
 ```
 
 Complete Chrome, Firefox, and Safari extension examples are available in `examples/extensions`.
+Run `pnpm build:extensions` to create loadable test folders in `examples/extensions/dist`.
 
 ## API
 
