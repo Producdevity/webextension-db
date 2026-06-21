@@ -1,52 +1,49 @@
-import { defineConfig } from 'rollup';
-import typescript from '@rollup/plugin-typescript';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import dts from 'rollup-plugin-dts';
+import commonjs from "@rollup/plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import typescript from "@rollup/plugin-typescript";
+import { defineConfig } from "rollup";
+import dts from "rollup-plugin-dts";
 
-const external = ['idb'];
+const input = "src/index.ts";
 
 export default defineConfig([
-  // ES Module and CommonJS builds
   {
-    input: 'src/index.ts',
+    input,
     output: [
       {
-        file: 'dist/index.js',
-        format: 'cjs',
+        file: "dist/index.js",
+        format: "es",
         sourcemap: true,
-        exports: 'named',
-        inlineDynamicImports: true
       },
       {
-        file: 'dist/index.esm.js',
-        format: 'es',
+        file: "dist/index.cjs",
+        format: "cjs",
+        exports: "named",
         sourcemap: true,
-        inlineDynamicImports: true
-      }
+      },
     ],
     plugins: [
       resolve({
         browser: true,
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       commonjs(),
       typescript({
-        tsconfig: './tsconfig.json'
-      })
+        tsconfig: "./tsconfig.json",
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+          noEmit: false,
+        },
+      }),
     ],
-    external
   },
-  // Type definitions
   {
-    input: 'src/index.ts',
+    input,
     output: {
-      file: 'dist/index.d.ts',
-      format: 'es'
+      file: "dist/index.d.ts",
+      format: "es",
     },
-    plugins: [
-      dts()
-    ],
-    external: [...external, /\.css$/]
-  }
-]); 
+    plugins: [dts()],
+  },
+]);
